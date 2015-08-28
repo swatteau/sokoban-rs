@@ -2,4 +2,4 @@ This game uses http://www.lostgarden.com/2007/05/dancs-miraculously-flexible-gam
 
 The complete set of tiles can be downloaded http://lostgarden.com/PlanetCute%20PNG.zip[here].
 
-The make_tileset.sh script can be used to assemble various tiles into a single texture (uses GraphicsMagick).
+The `make_tileset.sh` script can be used to assemble various tiles into a single texture (uses GraphicsMagick).
