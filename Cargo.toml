@@ -1,0 +1,12 @@
+[package]
+name = "sokoban-rs"
+version = "0.1.0"
+authors = ["Sébastien Watteau"]
+
+[dependencies]
+bitflags = "0.3.2"
+sdl2 = "0.8.0"
+xml-rs = "0.1.25"
+
+[dependencies.sdl2_image]
+git = "https://github.com/xsleonard/rust-sdl2_image"

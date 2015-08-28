@@ -1,0 +1,40 @@
+This is an implementation of Sokoban in the https://www.rust-lang.org[Rust Programming Language].
+
+# Build instructions
+
+To build sokoban-rs, type the following commands:
+
+    git clone https://github.com/swatteau/sokoban-rs
+    cd sokoban-rs
+    cargo build --release
+
+# How to play
+
+This game is released without any level. You can download level collections from http://www.sourcecode.se/sokoban/levels in the SLC (XML) format. For a quick start, try this:
+
+    wget http://www.sourcecode.se/sokoban/download/microban.slc
+    ./target/release/sokoban-rs /path/to/microban.slc
+
+* Use the arrow keys to move the player.
+* Type R to retry the current level.
+* Type N to skip the current level.
+
+# Credits
+
+The graphics used in this game are from Danc's Miraculously Flexible Game Prototyping Tiles (see http://www.lostgarden.com/2007/05/dancs-miraculously-flexible-game.html).
+
+# License
+
+    Copyright 2015 Sébastien Watteau
+    
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+        http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
