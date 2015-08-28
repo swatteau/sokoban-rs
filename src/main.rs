@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! This is an implement of Sokoban in Rust.
+//! This is an implementation of Sokoban in Rust.
 
 #[macro_use]
 extern crate bitflags;
