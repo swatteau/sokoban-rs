@@ -1,5 +1,8 @@
 This is an implementation of Sokoban in the https://www.rust-lang.org[Rust Programming Language].
 
+.An example level from the microban collection
+image:assets/image/screenshot.png["Screenshot",width=480,link="assets/image/screenshot.png"]
+
 == Build instructions
 
 To build sokoban-rs, type the following commands:
