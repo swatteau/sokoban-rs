@@ -251,10 +251,10 @@ bitflags!(
 
 /// Returns the shadow flags for a particular position in the given level.
 fn get_shadow_flags(level: &Level, pos: &Position) -> ShadowFlags {
-    let north = pos.neighboor(Direction::Up);
-    let south = pos.neighboor(Direction::Down);
-    let west = pos.neighboor(Direction::Left);
-    let east = pos.neighboor(Direction::Right);
+    let north = pos.neighbor(Direction::Up);
+    let south = pos.neighbor(Direction::Down);
+    let west = pos.neighbor(Direction::Left);
+    let east = pos.neighbor(Direction::Right);
 
     let mut flags = ShadowFlags::empty();
     if level.is_wall(&north) {
@@ -269,16 +269,16 @@ fn get_shadow_flags(level: &Level, pos: &Position) -> ShadowFlags {
     if level.is_wall(&east) {
         flags = flags | E_EDGE;
     }
-    if level.is_wall(&north.neighboor(Direction::Right)) && !flags.intersects(N_EDGE | E_EDGE) {
+    if level.is_wall(&north.neighbor(Direction::Right)) && !flags.intersects(N_EDGE | E_EDGE) {
         flags = flags | NE_CORNER;
     }
-    if level.is_wall(&north.neighboor(Direction::Left)) && !flags.intersects(N_EDGE | W_EDGE) {
+    if level.is_wall(&north.neighbor(Direction::Left)) && !flags.intersects(N_EDGE | W_EDGE) {
         flags = flags | NW_CORNER;
     }
-    if level.is_wall(&south.neighboor(Direction::Right)) && !flags.intersects(S_EDGE | E_EDGE) {
+    if level.is_wall(&south.neighbor(Direction::Right)) && !flags.intersects(S_EDGE | E_EDGE) {
         flags = flags | SE_CORNER;
     }
-    if level.is_wall(&south.neighboor(Direction::Left)) && !flags.intersects(S_EDGE | W_EDGE) {
+    if level.is_wall(&south.neighbor(Direction::Left)) && !flags.intersects(S_EDGE | W_EDGE) {
         flags = flags | SW_CORNER;
     }
     flags

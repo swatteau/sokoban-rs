@@ -40,7 +40,7 @@ impl Position {
     }
 
     /// Returns the position that is next to this one in the given direction.
-    pub fn neighboor(&self, dir: Direction) -> Position {
+    pub fn neighbor(&self, dir: Direction) -> Position {
         match dir {
             Direction::Up => Position(self.0 - 1, self.1),
             Direction::Down => Position(self.0 + 1, self.1),
@@ -78,11 +78,11 @@ pub struct Level {
 impl Level {
     /// Moves the player in the given direction if possible.
     pub fn step(&mut self, dir: Direction) {
-        let next_to_player = self.player.neighboor(dir);
+        let next_to_player = self.player.neighbor(dir);
         if self.is_free(&next_to_player) {
             self.move_player(next_to_player);
         } else if self.is_box(&next_to_player) {
-            let next_to_box = next_to_player.neighboor(dir);
+            let next_to_box = next_to_player.neighbor(dir);
             if self.is_free(&next_to_box) {
                 self.move_box(&next_to_player, next_to_box);
                 self.move_player(next_to_player);

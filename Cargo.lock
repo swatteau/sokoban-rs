@@ -85,7 +85,7 @@ dependencies = [
 [[package]]
 name = "sdl2_image"
 version = "0.2.5"
-source = "git+https://github.com/xsleonard/rust-sdl2_image#2b4064059d73aa003d8011b284f97277c466b3c7"
+source = "git+https://github.com/xsleonard/rust-sdl2_image#33381b399f6ad9301415a6261e561b1defb290e3"
 dependencies = [
  "bitflags 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
