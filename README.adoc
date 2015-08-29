@@ -14,6 +14,7 @@ sudo apt-get install libsdl2-dev libsdl2-image-dev
 ----
 
 You might also like to read the README for these projects:
+
 * https://github.com/AngryLawyer/rust-sdl2
 * https://github.com/xsleonard/rust-sdl2_image
 
