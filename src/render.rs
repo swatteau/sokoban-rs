@@ -113,8 +113,8 @@ impl<'a> Drawer<'a> {
         let (col, row) = tile.location().unwrap_or_else(|| {
             panic!("No image for this tile: {:?}", tile);
         });
-        let tile = self.get_tile_rect(col, row);
-        self.renderer.copy(&self.texture, tile, Some(Rect::new_unwrap(x, y, Tile::width(), Tile::height())));
+        let tile_rect = self.get_tile_rect(col, row);
+        self.renderer.copy(&self.texture, tile_rect, Some(Rect::new_unwrap(x, y, Tile::width(), Tile::height())));
     }
 
     /// Returns the Rect of the tile located at the given row and column in the texture.
