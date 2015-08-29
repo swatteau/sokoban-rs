@@ -5,6 +5,18 @@ image:assets/image/screenshot.png["Screenshot",width=480,link="assets/image/scre
 
 == Build instructions
 
+Before building sokoban-rs, you will need to install the developpement libraries for https://www.libsdl.org[SDL2], preferably with the package manager that comes
+with you operating system.
+
+.Example for Debian/Ubuntu:
+----
+sudo apt-get install libsdl2-dev libsdl2-image-dev
+----
+
+You might also like to read the README for these projects:
+* https://github.com/AngryLawyer/rust-sdl2
+* https://github.com/xsleonard/rust-sdl2_image
+
 To build sokoban-rs, type the following commands:
 
 ----
