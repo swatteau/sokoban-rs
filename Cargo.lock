@@ -1,8 +1,9 @@
 [root]
 name = "sokoban-rs"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "bitflags 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "clap 1.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "sdl2 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sdl2_image 0.2.5 (git+https://github.com/xsleonard/rust-sdl2_image)",
  "xml-rs 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -18,6 +19,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "ansi_term"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "bitflags"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -31,6 +37,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "bitflags"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "clap"
+version = "1.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "ansi_term 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "strsim 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "libc"
@@ -92,6 +107,11 @@ dependencies = [
  "sdl2 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sdl2-sys 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "strsim"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "winapi"

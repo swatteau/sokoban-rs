@@ -17,6 +17,7 @@
 
 #[macro_use]
 extern crate bitflags;
+extern crate clap;
 extern crate sdl2;
 extern crate sdl2_image;
 extern crate xml;
@@ -25,6 +26,7 @@ use std::path::Path;
 use std::fs::File;
 use std::io::BufReader;
 use std::str::FromStr;
+use clap::{App, Arg};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2_image::INIT_PNG;
@@ -38,13 +40,22 @@ use game::Level;
 use render::Drawer;
 
 pub fn main() {
-    let slc_file = std::env::args()
-        .skip(1)
-        .next()
-        .unwrap_or_else(|| {
-            println!("Argument missing: pleasy specify the path to an SLC file.");
-            std::process::exit(1);
-        });
+    let matches = App::new("sokoban-rs")
+        .version("0.2.0")
+        .author("Sébastien Watteau")
+        .about("An implementation of Sokoban in the Rust programming language.")
+        .arg(Arg::with_name("slc_file")
+             .help("a Sokoban level collection (SLC) file")
+             .required(true)
+        )
+        .arg(Arg::with_name("fullscreen")
+             .help("Launches the game in fullscreen mode")
+             .short("f")
+             .long("fullscreen")
+        )
+        .get_matches();
+
+    let slc_file = matches.value_of("slc_file").unwrap();
 
     let sdl_context = sdl2::init().unwrap_or_else(|err| {
         println!("Failed to initialize an SDL context: {}", err);
@@ -58,10 +69,14 @@ pub fn main() {
 
     sdl2_image::init(INIT_PNG);
 
-    let window = video_subsystem.window("sokoban-rs", 1024, 768)
-        .position_centered()
-        //.fullscreen()
-        .opengl()
+    let mut window_builder = video_subsystem.window("sokoban-rs", 1024, 768);
+    if matches.is_present("fullscreen") {
+        window_builder.fullscreen();
+    } else {
+        window_builder.position_centered();
+    }
+
+    let window = window_builder.opengl()
         .build()
         .unwrap_or_else(|err| {
             println!("Failed to create the window: {}", err);
