@@ -25,6 +25,7 @@ use std::path::Path;
 use std::fs::File;
 use std::io::BufReader;
 use std::str::FromStr;
+use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2_image::INIT_PNG;
 use xml::reader::EventReader;
@@ -97,32 +98,30 @@ pub fn main() {
             }
         }
         drawer.draw(&level);
-        for event in event_pump.poll_iter() {
-            use sdl2::event::Event;
-            match event {
-                Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-                    running = false
-                },
-                Event::KeyDown { keycode: Some(Keycode::Left), .. } => {
-                    level.step(game::Direction::Left);
-                }
-                Event::KeyDown { keycode: Some(Keycode::Right), .. } => {
-                    level.step(game::Direction::Right);
-                }
-                Event::KeyDown { keycode: Some(Keycode::Up), .. } => {
-                    level.step(game::Direction::Up);
-                }
-                Event::KeyDown { keycode: Some(Keycode::Down), .. } => {
-                    level.step(game::Direction::Down);
-                }
-                Event::KeyDown { keycode: Some(Keycode::R), .. } => {
-                    level = reference_level.clone();
-                }
-                Event::KeyDown { keycode: Some(Keycode::N), .. } => {
-                    skip = true;
-                }
-                _ => {}
+
+        match event_pump.wait_event() {
+            Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                running = false
+            },
+            Event::KeyDown { keycode: Some(Keycode::Left), .. } => {
+                level.step(game::Direction::Left);
             }
+            Event::KeyDown { keycode: Some(Keycode::Right), .. } => {
+                level.step(game::Direction::Right);
+            }
+            Event::KeyDown { keycode: Some(Keycode::Up), .. } => {
+                level.step(game::Direction::Up);
+            }
+            Event::KeyDown { keycode: Some(Keycode::Down), .. } => {
+                level.step(game::Direction::Down);
+            }
+            Event::KeyDown { keycode: Some(Keycode::R), .. } => {
+                level = reference_level.clone();
+            }
+            Event::KeyDown { keycode: Some(Keycode::N), .. } => {
+                skip = true;
+            }
+            _ => {}
         }
     }
     sdl2_image::quit();
