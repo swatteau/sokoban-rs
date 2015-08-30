@@ -33,6 +33,7 @@ use sdl2_image::INIT_PNG;
 use xml::reader::EventReader;
 use xml::reader::events::*;
 
+pub mod error;
 pub mod game;
 pub mod render;
 
@@ -119,7 +120,11 @@ pub fn main() {
 
     let mut drawer = Drawer::new(renderer);
 
-    let mut collection = load_slc_file(Path::new(&slc_file)).into_iter();
+    let mut collection = load_slc_file(Path::new(&slc_file))
+        .unwrap_or_else(|err| {
+            panic!("{}", err);
+        })
+        .into_iter();
     let mut reference_level = collection.next().unwrap();
     let mut level = reference_level.clone();
 
@@ -170,9 +175,10 @@ pub fn main() {
 }
 
 /// Builds levels from a level collection file in the SLC format.
-fn load_slc_file(path: &Path) -> Vec<Level> {
+fn load_slc_file(path: &Path) -> Result<Vec<Level>, error::SokobanError> {
     let mut collection = Vec::new();
-    let reader = BufReader::new(File::open(&path).unwrap());
+    let file = try!(File::open(&path));
+    let reader = BufReader::new(file);
     let mut parser = EventReader::new(reader);
 
     let mut level_str = String::new();
@@ -184,7 +190,7 @@ fn load_slc_file(path: &Path) -> Vec<Level> {
             },
             XmlEvent::EndElement { name } => {
                 if name.local_name == "Level" {
-                    collection.push(Level::from_str(&level_str).unwrap());
+                    collection.push(try!(Level::from_str(&level_str)));
                     level_str.clear();
                 }
             },
@@ -198,5 +204,5 @@ fn load_slc_file(path: &Path) -> Vec<Level> {
         }
     }
 
-    collection
+    Ok(collection)
 }

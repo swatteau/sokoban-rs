@@ -14,6 +14,7 @@
 // limitations under the License.
 
 use std::collections::HashSet;
+use std::fmt::{self, Display, Formatter};
 use std::str::FromStr;
 
 /// Represents a direction.
@@ -158,6 +159,13 @@ impl Level {
 /// Represents an error due to reading an invalid character.
 #[derive(Debug)]
 pub struct InvalidChar(char, Position);
+
+impl Display for InvalidChar {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        let InvalidChar(c, pos) = *self;
+        write!(f, "invalid character `{}' at row {}, column {}", c, pos.row(), pos.column())
+    }
+}
 
 impl FromStr for Level {
     type Err = InvalidChar;
