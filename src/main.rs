@@ -53,9 +53,36 @@ pub fn main() {
              .short("f")
              .long("fullscreen")
         )
+        .arg(Arg::with_name("width")
+             .help("The width of the window in pixels")
+             .short("w")
+             .long("width")
+             .takes_value(true)
+             .requires("height")
+        )
+        .arg(Arg::with_name("height")
+             .help("The height of the window in pixels")
+             .short("h")
+             .long("height")
+             .takes_value(true)
+             .requires("width")
+        )
         .get_matches();
 
     let slc_file = matches.value_of("slc_file").unwrap();
+
+    let width: u32 = matches.value_of("width")
+        .unwrap_or("1024")
+        .parse()
+        .unwrap_or_else(|err| {
+            panic!("Couldn't parse width as an integer: {}", err);
+        });
+    let height: u32 = matches.value_of("height")
+        .unwrap_or("768")
+        .parse()
+        .unwrap_or_else(|err| {
+            panic!("Couldn't parse height as an integer: {}", err);
+        });
 
     let sdl_context = sdl2::init().unwrap_or_else(|err| {
         println!("Failed to initialize an SDL context: {}", err);
@@ -69,7 +96,7 @@ pub fn main() {
 
     sdl2_image::init(INIT_PNG);
 
-    let mut window_builder = video_subsystem.window("sokoban-rs", 1024, 768);
+    let mut window_builder = video_subsystem.window("sokoban-rs", width, height);
     if matches.is_present("fullscreen") {
         window_builder.fullscreen();
     } else {
