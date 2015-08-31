@@ -21,3 +21,4 @@ install:
   - cd SDL2_image-*
   - ./configure && make && sudo make install
   - cd -
+  - cd sokoban-rs
