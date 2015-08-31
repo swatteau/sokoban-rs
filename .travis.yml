@@ -6,3 +6,6 @@ rust:
 matrix:
   allow_failures:
     - rust: nightly
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y libsdl2-dev libsdl2-image-dev
