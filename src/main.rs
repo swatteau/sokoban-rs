@@ -20,6 +20,7 @@ extern crate bitflags;
 extern crate clap;
 extern crate sdl2;
 extern crate sdl2_image;
+extern crate sdl2_ttf;
 extern crate xml;
 
 use std::path::Path;
@@ -96,6 +97,7 @@ pub fn main() {
     });
 
     sdl2_image::init(INIT_PNG);
+    sdl2_ttf::init();
 
     let mut window_builder = video_subsystem.window("sokoban-rs", width, height);
     if matches.is_present("fullscreen") {
@@ -171,6 +173,7 @@ pub fn main() {
             _ => {}
         }
     }
+    sdl2_ttf::quit();
     sdl2_image::quit();
 }
 
@@ -181,16 +184,25 @@ fn load_slc_file(path: &Path) -> Result<Vec<Level>, error::SokobanError> {
     let reader = BufReader::new(file);
     let mut parser = EventReader::new(reader);
 
+    let mut level_title = String::new();
     let mut level_str = String::new();
     let mut reading_level = false;
     for e in parser.events() {
         match e {
-            XmlEvent::StartElement { name, .. } => {
-                reading_level = name.local_name == "L";
+            XmlEvent::StartElement { ref name, ref attributes, .. } => {
+                if name.local_name == "L" {
+                    reading_level = true;
+                } else if name.local_name == "Level" {
+                    if let Some(id) = attributes.iter().find(|&attr| attr.name.local_name == "Id") {
+                        level_title = id.value.clone();
+                    }
+                }
             },
             XmlEvent::EndElement { name } => {
                 if name.local_name == "Level" {
-                    collection.push(try!(Level::from_str(&level_str)));
+                    let mut level = try!(Level::from_str(&level_str));
+                    level.set_title(level_title.clone());
+                    collection.push(level);
                     level_str.clear();
                 }
             },

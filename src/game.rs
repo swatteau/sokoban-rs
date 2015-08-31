@@ -64,6 +64,8 @@ impl Position {
 /// Represents the state of the level.
 #[derive(Clone)]
 pub struct Level {
+    /// The level's title
+    title: String,
     /// The player's position
     player: Position,
     /// The current number of steps
@@ -140,6 +142,16 @@ impl Level {
         (w + 1, h + 1)
     }
 
+    /// Returns the title
+    pub fn title(&self) -> &str {
+        &self.title
+    }
+
+    /// Changes the title
+    pub fn set_title<S: Into<String>>(&mut self, title: S) {
+        self.title = title.into();
+    }
+
     /// moves the player to the given position.
     fn move_player(&mut self, pos: Position) {
         if pos != self.player {
@@ -172,6 +184,7 @@ impl FromStr for Level {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut level = Level {
+            title: String::new(),
             player: Position(0, 0),
             steps: 0,
             walls: HashSet::new(),

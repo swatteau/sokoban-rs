@@ -17,7 +17,8 @@ use std::path::Path;
 use sdl2::rect::Rect;
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::render::{Renderer, Texture};
-use sdl2_image::{LoadTexture};
+use sdl2_image::LoadTexture;
+use sdl2_ttf::Font;
 
 use super::game::{Level, Position, Direction};
 
@@ -27,8 +28,22 @@ pub struct Drawer<'a> {
     renderer: Renderer<'a>,
     /// The texture containing all the tiles
     texture: Texture,
+    /// The font used to display text
+    font: Font,
     /// The size of the screen in pixels
     screen_size: (u32, u32),
+    /// The height of the status bar
+    bar_height: u32,
+    /// The color of the status bar
+    bar_color: Color,
+    /// The color of the text in the status bar
+    bar_text_color: Color,
+}
+
+/// Represents a location for text in the status bar
+enum StatusBarLocation {
+    FlushLeft,
+    FlushRight,
 }
 
 impl<'a> Drawer<'a> {
@@ -36,11 +51,16 @@ impl<'a> Drawer<'a> {
     pub fn new(renderer: Renderer<'a>) -> Drawer {
         let path = Path::new("assets/image/tileset.png");
         let texture = renderer.load_texture(path).unwrap();
+        let font = Font::from_file(Path::new("assets/font/RujisHandwritingFontv.2.0.ttf"), 20).unwrap();
         let screen_size = renderer.window().unwrap().drawable_size();
         Drawer {
             renderer: renderer,
             texture: texture,
+            font: font,
             screen_size: screen_size,
+            bar_height: 32,
+            bar_color: Color::RGBA(20, 20, 20, 255),
+            bar_text_color: Color::RGBA(255, 192, 0, 255),
         }
     }
 
@@ -64,6 +84,9 @@ impl<'a> Drawer<'a> {
 
         self.renderer.clear();
         self.renderer.copy(&texture, Some(Rect::new_unwrap(0, 0, fullsize.0, fullsize.1)), final_rect);
+
+        self.draw_status_bar(&level);
+
         self.renderer.present();
     }
 
@@ -108,6 +131,42 @@ impl<'a> Drawer<'a> {
         }
     }
 
+    /// Draws the status bar
+    fn draw_status_bar(&mut self, level: &Level) {
+        let prev_color = self.renderer.draw_color();
+        self.renderer.set_draw_color(self.bar_color);
+        let rect = Rect::new_unwrap(0, (self.screen_size.1 - self.bar_height) as i32, self.screen_size.0, self.bar_height);
+        self.renderer.fill_rect(rect);
+        self.renderer.set_draw_color(prev_color);
+
+        // Draw the number of moves
+        let s = format!("# moves: {}", level.get_steps());
+        self.draw_status_text(&s, StatusBarLocation::FlushLeft);
+
+        // Draw the level's title
+        self.draw_status_text(level.title(), StatusBarLocation::FlushRight);
+    }
+
+    /// Draws text in the status bar
+    fn draw_status_text(&mut self, text: &str, location: StatusBarLocation) {
+        let surface = self.font.render_str_blended(text, self.bar_text_color).unwrap();
+        let texture = self.renderer.create_texture_from_surface(&surface).unwrap();
+        let margin = 4;
+        let (w, h) = {
+            let q = texture.query();
+            (q.width, q.height)
+        };
+        let (x, y) = match location {
+            StatusBarLocation::FlushLeft => {
+                (margin as i32, (self.screen_size.1 - margin - h) as i32)
+            },
+            StatusBarLocation::FlushRight => {
+                ((self.screen_size.0 - margin - w) as i32, (self.screen_size.1 - margin - h) as i32)
+            },
+        };
+        self.renderer.copy(&texture, None, Some(Rect::new_unwrap(x, y, w, h)));
+    }
+
     /// Draws a tile at the given coordinates.
     fn draw_tile(&mut self, tile: Tile, x: i32, y: i32) {
         let (col, row) = tile.location().unwrap_or_else(|| {
@@ -141,7 +200,8 @@ impl<'a> Drawer<'a> {
     fn get_scaled_rendering_size(&self, level: &Level) -> (u32, u32) {
         let render_size = self.get_rendering_size(&level);
         let width_ratio = (self.screen_size.0 as f64) / (render_size.0 as f64);
-        let height_ratio = (self.screen_size.1 as f64) / (render_size.1 as f64);
+        let h = self.screen_size.1 - self.bar_height;
+        let height_ratio = (h as f64) / (render_size.1 as f64);
         let ratio = f64::min(1.0, f64::min(width_ratio, height_ratio));
 
         let scale = |sz: u32| {
@@ -154,7 +214,7 @@ impl<'a> Drawer<'a> {
     /// Returns the Rect of an image of given dimensions so that it's centered on the screen.
     fn get_centered_image_rect(&self, img_size: (u32, u32)) -> Option<Rect> {
         let x = (self.screen_size.0 - img_size.0) as i32 / 2;
-        let y = (self.screen_size.1 - img_size.1) as i32 / 2;
+        let y = (self.screen_size.1 - self.bar_height - img_size.1) as i32 / 2;
         Some(Rect::new_unwrap(x, y, img_size.0, img_size.1))
     }
 }
