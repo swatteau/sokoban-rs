@@ -6,6 +6,18 @@ rust:
 matrix:
   allow_failures:
     - rust: nightly
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y libsdl2-dev libsdl2-image-dev
+env:
+  global:
+    - LD_LIBRARY_PATH: /usr/local/lib
+install:
+  - cd ..
+  - time wget -q http://www.libsdl.org/release/SDL2-2.0.3.tar.gz
+  - time wget -q http://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.0.tar.gz
+  - time tar xf SDL2-*.tar.gz
+  - time tar xf SDL2_image-*.tar.gz
+  - cd SDL2-*
+  - ./configure && make && sudo make install
+  - cd -
+  - cd SDL2_image-*
+  - ./configure && make && sudo make install
+  - cd -
