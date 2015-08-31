@@ -3,7 +3,7 @@ image:https://img.shields.io/badge/license-Apache%202-blue.svg["License", link="
 
 This is an implementation of Sokoban in the https://www.rust-lang.org[Rust Programming Language].
 
-.An example level from the microban collection
+.An example level:
 image:assets/image/screenshot.png["Screenshot",width=480,link="assets/image/screenshot.png"]
 
 == Build instructions
