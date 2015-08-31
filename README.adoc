@@ -13,13 +13,14 @@ with your operating system.
 
 .Example for Debian/Ubuntu:
 ----
-sudo apt-get install libsdl2-dev libsdl2-image-dev
+sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
 ----
 
 .Example for Mac OSX
 ----
 brew install sdl2
 brew install sdl2_image
+brew install sdl2_ttf
 ----
 
 You might also like to read the README for these projects:
