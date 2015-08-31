@@ -16,6 +16,7 @@ install:
   - time wget -q http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.12.tar.gz
   - time tar xf SDL2-*.tar.gz
   - time tar xf SDL2_image-*.tar.gz
+  - time tar xf SDL2_ttf-*.tar.gz
   - cd SDL2-*
   - ./configure && make && sudo make install
   - cd -
