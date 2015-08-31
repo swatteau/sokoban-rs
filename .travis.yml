@@ -25,4 +25,5 @@ install:
   - cd -
   - cd SDL2_ttf-*
   - ./configure && make && sudo make install
+  - cd -
   - cd sokoban-rs
