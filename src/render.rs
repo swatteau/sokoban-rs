@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::cmp;
 use std::ops::Deref;
 use std::path::Path;
 use sdl2::rect::Rect;
@@ -23,13 +24,12 @@ use sdl2_ttf::Font;
 
 use super::game::{Level, Position, Direction};
 
-
 /// The Drawer struct is responsible for drawing the game onto the screen.
 pub struct Drawer<'a> {
     /// The underlying SDL renderer
     renderer: Renderer<'a>,
     /// The active tileset
-    tileset: Switch,
+    tileset: TileSetSwitch,
     /// The font used to display text
     font: Font,
     /// The size of the screen in pixels
@@ -53,7 +53,7 @@ impl<'a> Drawer<'a> {
     pub fn new(renderer: Renderer<'a>) -> Drawer {
         let font = Font::from_file(Path::new("assets/font/RujisHandwritingFontv.2.0.ttf"), 20).unwrap();
         let screen_size = renderer.window().unwrap().drawable_size();
-        let tileset = Switch::new(&renderer);
+        let tileset = TileSetSwitch::new(&renderer);
         Drawer {
             renderer: renderer,
             tileset: tileset,
@@ -67,6 +67,8 @@ impl<'a> Drawer<'a> {
 
     /// Draws a level onto the screen.
     pub fn draw(&mut self, level: &Level) {
+        self.tileset.set_extents(level.extents());
+
         // Draw a full-size image onto an off-screen buffer
         let fullsize = self.tileset.get_rendering_size(level.extents());
         let _ = self.renderer.render_target()
@@ -288,6 +290,7 @@ struct BigTileSet {
 }
 
 impl BigTileSet {
+    /// Creates a new instance.
     pub fn new(renderer: &Renderer) -> Self {
         BigTileSet {
             texture: renderer.load_texture(Path::new("assets/image/tileset.png")).unwrap()
@@ -296,11 +299,25 @@ impl BigTileSet {
 }
 
 impl TileSet for BigTileSet {
-    fn texture(&self) -> &Texture { &self.texture }
-    fn tile_width(&self) -> u32 { 101 }
-    fn tile_height(&self) -> u32 { 171 }
-    fn tile_effective_height(&self) -> u32 { 83 }
-    fn tile_offset(&self) -> i32 { 40 }
+    fn texture(&self) -> &Texture {
+        &self.texture
+    }
+
+    fn tile_width(&self) -> u32 {
+        101
+    }
+
+    fn tile_height(&self) -> u32 {
+        171
+    }
+
+    fn tile_effective_height(&self) -> u32 {
+        83
+    }
+
+    fn tile_offset(&self) -> i32 {
+        40
+    }
 }
 
 /// Holds information about the small tileset.
@@ -309,6 +326,7 @@ struct SmallTileSet {
 }
 
 impl SmallTileSet {
+    /// Creates a new instance.
     pub fn new(renderer: &Renderer) -> Self {
         SmallTileSet {
             texture: renderer.load_texture(Path::new("assets/image/tileset-small.png")).unwrap()
@@ -317,31 +335,65 @@ impl SmallTileSet {
 }
 
 impl TileSet for SmallTileSet {
-    fn texture(&self) -> &Texture { &self.texture }
-    fn tile_width(&self) -> u32 { 50 }
-    fn tile_height(&self) -> u32 { 85 }
-    fn tile_effective_height(&self) -> u32 { 41 }
-    fn tile_offset(&self) -> i32 { 20 }
-}
+    fn texture(&self) -> &Texture {
+        &self.texture
+    }
 
-struct Switch {
-    small: SmallTileSet,
-    big: BigTileSet,
-}
+    fn tile_width(&self) -> u32 {
+        50
+    }
 
-impl Switch {
-    pub fn new(renderer: &Renderer) -> Self {
-        Switch {
-            big: BigTileSet::new(renderer),
-            small: SmallTileSet::new(renderer),
-        }
+    fn tile_height(&self) -> u32 {
+        85
+    }
+
+    fn tile_effective_height(&self) -> u32 {
+        41
+    }
+
+    fn tile_offset(&self) -> i32 {
+        20
     }
 }
 
-impl Deref for Switch {
+/// Enables switching between two tilesets.
+struct TileSetSwitch {
+    /// The limit value for switching
+    limit: i32,
+    /// The extents of the current level
+    extents: (i32, i32),
+    /// The small tileset
+    tileset_small: SmallTileSet,
+    /// The big tileset
+    tileset_big: BigTileSet,
+}
+
+impl TileSetSwitch {
+    /// Creates a new instance.
+    pub fn new(renderer: &Renderer) -> Self {
+        TileSetSwitch {
+            limit: 40,
+            extents: (0, 0),
+            tileset_big: BigTileSet::new(renderer),
+            tileset_small: SmallTileSet::new(renderer),
+        }
+    }
+
+    /// Updates the switch with the given extents.
+    pub fn set_extents(&mut self, extents: (i32, i32)) {
+        self.extents = extents;
+    }
+}
+
+// Select the appropriate tileset while dereferencing
+impl Deref for TileSetSwitch {
     type Target = TileSet;
     fn deref(&self) -> &Self::Target {
-        &self.small
+        if cmp::max(self.extents.0, self.extents.1) > self.limit {
+            &self.tileset_small
+        } else {
+            &self.tileset_big
+        }
     }
 }
 
@@ -402,4 +454,3 @@ fn get_shadow_flags(level: &Level, pos: &Position) -> ShadowFlags {
     }
     flags
 }
-
