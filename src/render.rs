@@ -28,6 +28,7 @@ pub struct Drawer<'a> {
     renderer: Renderer<'a>,
     /// The texture containing all the tiles
     texture: Texture,
+    tileset: Box<TileSet>,
     /// The font used to display text
     font: Font,
     /// The size of the screen in pixels
@@ -56,6 +57,7 @@ impl<'a> Drawer<'a> {
         Drawer {
             renderer: renderer,
             texture: texture,
+            tileset: Box::new(BigTileSet),
             font: font,
             screen_size: screen_size,
             bar_height: 32,
@@ -99,7 +101,7 @@ impl<'a> Drawer<'a> {
         for j in (0..rows) {
             for i in (0..cols) {
                 let pos = Position::new(j, i);
-                let (x, y) = Tile::get_coordinates(&pos);
+                let (x, y) = self.tileset.get_coordinates(&pos);
 
                 // First draw the floor tiles
                 if level.is_square(&pos) {
@@ -117,7 +119,7 @@ impl<'a> Drawer<'a> {
                 }
 
                 // Draw the other items
-                let z = y - Tile::offset();
+                let z = y - self.tileset.tile_offset();
                 if level.is_wall(&pos) {
                     self.draw_tile(Tile::Wall, x, z);
                 }
@@ -169,26 +171,27 @@ impl<'a> Drawer<'a> {
 
     /// Draws a tile at the given coordinates.
     fn draw_tile(&mut self, tile: Tile, x: i32, y: i32) {
-        let (col, row) = tile.location().unwrap_or_else(|| {
+        let (col, row) = self.tileset.location(tile).unwrap_or_else(|| {
             panic!("No image for this tile: {:?}", tile);
         });
         let tile_rect = self.get_tile_rect(col, row);
-        self.renderer.copy(&self.texture, tile_rect, Some(Rect::new_unwrap(x, y, Tile::width(), Tile::height())));
+        self.renderer.copy(&self.texture, tile_rect, Some(Rect::new_unwrap(x, y, self.tileset.tile_width(), self.tileset.tile_height())));
     }
 
     /// Returns the Rect of the tile located at the given row and column in the texture.
     fn get_tile_rect(&self, col: u32, row: u32) -> Option<Rect> {
-        let x = (col * Tile::width()) as i32;
-        let y = (row * Tile::height()) as i32;
-        Some(Rect::new_unwrap(x, y, Tile::width(), Tile::height()))
+        let (w, h) = (self.tileset.tile_width(), self.tileset.tile_height());
+        let x = (col * w) as i32;
+        let y = (row * h) as i32;
+        Some(Rect::new_unwrap(x, y, w, h))
     }
 
     /// Returns the full size needed to draw the given level.
     fn get_rendering_size(&self, level: &Level) -> (u32, u32) {
         let (w, h) = level.extents();
-        let width = w as u32 * Tile::width();
+        let width = w as u32 * self.tileset.tile_width();
         let height = if h > 0 {
-            Tile::height() + (h - 1) as u32 * Tile::effective_height()
+            self.tileset.tile_height() + (h - 1) as u32 * self.tileset.tile_effective_height()
         } else {
             0
         };
@@ -220,7 +223,7 @@ impl<'a> Drawer<'a> {
 }
 
 /// Represents a kind of tile.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 enum Tile {
     /// Standard floor tile
     Floor,
@@ -236,10 +239,23 @@ enum Tile {
     Shadow(ShadowFlags),
 }
 
-impl Tile {
+/// Holds information about a tileset.
+trait TileSet {
+    /// Returns the width of a tile.
+    fn tile_width(&self) -> u32;
+
+    /// Returns the height of a tile.
+    fn tile_height(&self) -> u32;
+
+    /// Returns the effective height of a tile (used for stacking)
+    fn tile_effective_height(&self) -> u32;
+
+    /// Returns the offset need to draw items on the floor.
+    fn tile_offset(&self) -> i32;
+
     /// Returns the location of the tile in the tileset texture.
-    pub fn location(&self) -> Option<(u32, u32)> {
-        match *self {
+    fn location(&self, tile: Tile) -> Option<(u32, u32)> {
+        match tile {
            Tile::Floor => Some((0, 0)),
            Tile::Wall => Some((0, 2)),
            Tile::Rock => Some((2, 0)),
@@ -257,33 +273,33 @@ impl Tile {
         }
     }
 
-    /// Returns the width of a tile.
-    pub fn width() -> u32 {
-        101
-    }
-
-    /// Returns the height of a tile.
-    pub fn height() -> u32 {
-        171
-    }
-
-    /// Returns the effective height of a tile (used for stacking)
-    pub fn effective_height() -> u32 {
-        83
-    }
-
-    /// Returns the offset need to draw items on the floor.
-    pub fn offset() -> i32 {
-        40
-    }
-
     /// Returns the top-left corner coordinates of the tile corresponding
     /// to the given position.
-    fn get_coordinates(pos: &Position) -> (i32, i32) {
-        let x = Self::width() as i32 * pos.column();
-        let y = Self::effective_height() as i32 * pos.row();
+    fn get_coordinates(&self, pos: &Position) -> (i32, i32) {
+        let x = self.tile_width() as i32 * pos.column();
+        let y = self.tile_effective_height() as i32 * pos.row();
         (x, y)
     }
+}
+
+/// Holds information about the big tileset.
+struct BigTileSet;
+
+impl TileSet for BigTileSet {
+    fn tile_width(&self) -> u32 { 101 }
+    fn tile_height(&self) -> u32 { 171 }
+    fn tile_effective_height(&self) -> u32 { 83 }
+    fn tile_offset(&self) -> i32 { 40 }
+}
+
+/// Holds information about the small tileset.
+struct SmallTileSet;
+
+impl TileSet for SmallTileSet {
+    fn tile_width(&self) -> u32 { 50 }
+    fn tile_height(&self) -> u32 { 85 }
+    fn tile_effective_height(&self) -> u32 { 41 }
+    fn tile_offset(&self) -> i32 { 20 }
 }
 
 bitflags!(
