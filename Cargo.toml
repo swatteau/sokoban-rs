@@ -1,7 +1,12 @@
 [package]
 name = "sokoban-rs"
-version = "0.3.1"
+version = "1.0.0"
 authors = ["Sébastien Watteau"]
+description = "An implementation of Sokoban in Rust"
+repository = "https://github.com/swatteau/sokoban-rs"
+readme = "README.adoc"
+keywords = ["game", "sokoban"]
+license = "Apache-2.0"
 
 [dependencies]
 bitflags = "0.3.2"

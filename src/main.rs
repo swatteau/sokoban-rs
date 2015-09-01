@@ -43,7 +43,7 @@ use render::Drawer;
 
 pub fn main() {
     let matches = App::new("sokoban-rs")
-        .version("0.3.1")
+        .version("1.0.0")
         .author("Sébastien Watteau")
         .about("An implementation of Sokoban in the Rust programming language.")
         .arg(Arg::with_name("slc_file")
