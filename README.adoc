@@ -27,6 +27,7 @@ You might also like to read the README for these projects:
 
 * https://github.com/AngryLawyer/rust-sdl2
 * https://github.com/xsleonard/rust-sdl2_image
+* https://github.com/andelf/rust-sdl2_ttf
 
 To build sokoban-rs, type the following commands:
 
@@ -51,7 +52,7 @@ wget http://www.sourcecode.se/sokoban/download/microban.slc
 
 == Credits
 
-The graphics used in this game are from Danc's Miraculously Flexible Game Prototyping Tiles (see http://www.lostgarden.com/2007/05/dancs-miraculously-flexible-game.html).
+The graphics used in this game are from http://www.lostgarden.com/2007/05/dancs-miraculously-flexible-game.html[Danc's Miraculously Flexible Game Prototyping Tiles].
 
 == License
 
