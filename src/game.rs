@@ -76,6 +76,8 @@ pub struct Level {
     boxes: HashSet<Position>,
     /// The positions of the squares
     squares: HashSet<Position>,
+    /// The number of columns and rows in the level
+    extents: (i32, i32),
 }
 
 impl Level {
@@ -130,16 +132,7 @@ impl Level {
 
     /// Returns the number of columns and rows of this level.
     pub fn extents(&self) -> (i32, i32) {
-        let (mut w, mut h) = (self.player.column(), self.player.row());
-        for pos in self.walls.iter().chain(self.squares.iter()).chain(self.boxes.iter()) {
-            if pos.column() > w {
-                w = pos.column();
-            }
-            if pos.row() > h {
-                h = pos.row();
-            }
-        }
-        (w + 1, h + 1)
+        self.extents
     }
 
     /// Returns the title
@@ -190,6 +183,7 @@ impl FromStr for Level {
             walls: HashSet::new(),
             boxes: HashSet::new(),
             squares: HashSet::new(),
+            extents: (0, 0),
         };
 
         let (mut row, mut col) = (0, 0);
@@ -227,6 +221,18 @@ impl FromStr for Level {
             }
             col += 1;
         }
+
+        // Calculate the extents of the level
+        let (mut w, mut h) = (level.player.column(), level.player.row());
+        for pos in level.walls.iter().chain(level.squares.iter()).chain(level.boxes.iter()) {
+            if pos.column() > w {
+                w = pos.column();
+            }
+            if pos.row() > h {
+                h = pos.row();
+            }
+        }
+        level.extents = (w + 1, h + 1);
 
         Ok(level)
     }
