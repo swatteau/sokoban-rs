@@ -1,5 +1,5 @@
 image:https://travis-ci.org/swatteau/sokoban-rs.svg["Build Status", link="https://travis-ci.org/swatteau/sokoban-rs"]
-image:https://img.shields.io/badge/crates.io-v1.0.0-orange.svg["Crates.io", link="https://crates.io/crates/sokoban-rs"]
+image:http://meritbadge.herokuapp.com/sokoban-rs["Crates.io", link="https://crates.io/crates/sokoban-rs"]
 image:https://img.shields.io/badge/license-Apache%202-blue.svg["License", link="https://www.apache.org/licenses/LICENSE-2.0"]
 
 This is an implementation of Sokoban in the https://www.rust-lang.org[Rust Programming Language].
