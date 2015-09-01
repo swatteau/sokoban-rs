@@ -5,10 +5,9 @@ authors = ["Sébastien Watteau"]
 
 [dependencies]
 bitflags = "0.3.2"
-clap = "1.2.5"
+clap = "1.3.0"
 sdl2 = "0.8.0"
+sdl2_image = "0.2.5"
 sdl2_ttf = "0.6.1"
 xml-rs = "0.1.25"
 
-[dependencies.sdl2_image]
-git = "https://github.com/xsleonard/rust-sdl2_image"
