@@ -68,7 +68,7 @@ impl<'a> Drawer<'a> {
     /// Draws a level onto the screen.
     pub fn draw(&mut self, level: &Level) {
         // Draw a full-size image onto an off-screen buffer
-        let fullsize = self.get_rendering_size(&level);
+        let fullsize = self.tileset.get_rendering_size(level.extents());
         let _ = self.renderer.render_target()
             .expect("Render targets are not supported")
             .create_and_set(PixelFormatEnum::RGBA8888, fullsize);
@@ -185,22 +185,9 @@ impl<'a> Drawer<'a> {
         Some(Rect::new_unwrap(x, y, w, h))
     }
 
-    /// Returns the full size needed to draw the given level.
-    fn get_rendering_size(&self, level: &Level) -> (u32, u32) {
-        let (w, h) = level.extents();
-        let width = w as u32 * self.tileset.tile_width();
-        let height = if h > 0 {
-            self.tileset.tile_height() + (h - 1) as u32 * self.tileset.tile_effective_height()
-        } else {
-            0
-        };
-
-        (width, height)
-    }
-
     /// Returns the size of the drawing scaled to fit onto the screen.
     fn get_scaled_rendering_size(&self, level: &Level) -> (u32, u32) {
-        let render_size = self.get_rendering_size(&level);
+        let render_size = self.tileset.get_rendering_size(level.extents());
         let width_ratio = (self.screen_size.0 as f64) / (render_size.0 as f64);
         let h = self.screen_size.1 - self.bar_height;
         let height_ratio = (h as f64) / (render_size.1 as f64);
@@ -281,6 +268,17 @@ trait TileSet {
         let x = self.tile_width() as i32 * pos.column();
         let y = self.tile_effective_height() as i32 * pos.row();
         (x, y)
+    }
+
+    /// Returns the full size needed to draw a level of the given dimensions.
+    fn get_rendering_size(&self, extents: (i32, i32)) -> (u32, u32) {
+        let width = extents.0 as u32 * self.tile_width();
+        let height = if extents.1 > 0 {
+            self.tile_height() + (extents.1 - 1) as u32 * self.tile_effective_height()
+        } else {
+            0
+        };
+        (width, height)
     }
 }
 
