@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::ops::Deref;
 use std::path::Path;
 use sdl2::rect::Rect;
 use sdl2::pixels::{Color, PixelFormatEnum};
@@ -22,13 +23,13 @@ use sdl2_ttf::Font;
 
 use super::game::{Level, Position, Direction};
 
+
 /// The Drawer struct is responsible for drawing the game onto the screen.
 pub struct Drawer<'a> {
     /// The underlying SDL renderer
     renderer: Renderer<'a>,
-    /// The texture containing all the tiles
-    texture: Texture,
-    tileset: Box<TileSet>,
+    /// The active tileset
+    tileset: Switch,
     /// The font used to display text
     font: Font,
     /// The size of the screen in pixels
@@ -50,14 +51,12 @@ enum StatusBarLocation {
 impl<'a> Drawer<'a> {
     /// Creates a new Drawer instance.
     pub fn new(renderer: Renderer<'a>) -> Drawer {
-        let path = Path::new("assets/image/tileset.png");
-        let texture = renderer.load_texture(path).unwrap();
         let font = Font::from_file(Path::new("assets/font/RujisHandwritingFontv.2.0.ttf"), 20).unwrap();
         let screen_size = renderer.window().unwrap().drawable_size();
+        let tileset = Switch::new(&renderer);
         Drawer {
             renderer: renderer,
-            texture: texture,
-            tileset: Box::new(BigTileSet),
+            tileset: tileset,
             font: font,
             screen_size: screen_size,
             bar_height: 32,
@@ -175,7 +174,7 @@ impl<'a> Drawer<'a> {
             panic!("No image for this tile: {:?}", tile);
         });
         let tile_rect = self.get_tile_rect(col, row);
-        self.renderer.copy(&self.texture, tile_rect, Some(Rect::new_unwrap(x, y, self.tileset.tile_width(), self.tileset.tile_height())));
+        self.renderer.copy(self.tileset.texture(), tile_rect, Some(Rect::new_unwrap(x, y, self.tileset.tile_width(), self.tileset.tile_height())));
     }
 
     /// Returns the Rect of the tile located at the given row and column in the texture.
@@ -241,6 +240,9 @@ enum Tile {
 
 /// Holds information about a tileset.
 trait TileSet {
+    /// Returns the associated texture
+    fn texture(&self) -> &Texture;
+
     /// Returns the width of a tile.
     fn tile_width(&self) -> u32;
 
@@ -283,9 +285,20 @@ trait TileSet {
 }
 
 /// Holds information about the big tileset.
-struct BigTileSet;
+struct BigTileSet {
+    texture: Texture
+}
+
+impl BigTileSet {
+    pub fn new(renderer: &Renderer) -> Self {
+        BigTileSet {
+            texture: renderer.load_texture(Path::new("assets/image/tileset.png")).unwrap()
+        }
+    }
+}
 
 impl TileSet for BigTileSet {
+    fn texture(&self) -> &Texture { &self.texture }
     fn tile_width(&self) -> u32 { 101 }
     fn tile_height(&self) -> u32 { 171 }
     fn tile_effective_height(&self) -> u32 { 83 }
@@ -293,13 +306,45 @@ impl TileSet for BigTileSet {
 }
 
 /// Holds information about the small tileset.
-struct SmallTileSet;
+struct SmallTileSet {
+    texture: Texture
+}
+
+impl SmallTileSet {
+    pub fn new(renderer: &Renderer) -> Self {
+        SmallTileSet {
+            texture: renderer.load_texture(Path::new("assets/image/tileset-small.png")).unwrap()
+        }
+    }
+}
 
 impl TileSet for SmallTileSet {
+    fn texture(&self) -> &Texture { &self.texture }
     fn tile_width(&self) -> u32 { 50 }
     fn tile_height(&self) -> u32 { 85 }
     fn tile_effective_height(&self) -> u32 { 41 }
     fn tile_offset(&self) -> i32 { 20 }
+}
+
+struct Switch {
+    small: SmallTileSet,
+    big: BigTileSet,
+}
+
+impl Switch {
+    pub fn new(renderer: &Renderer) -> Self {
+        Switch {
+            big: BigTileSet::new(renderer),
+            small: SmallTileSet::new(renderer),
+        }
+    }
+}
+
+impl Deref for Switch {
+    type Target = TileSet;
+    fn deref(&self) -> &Self::Target {
+        &self.small
+    }
 }
 
 bitflags!(
