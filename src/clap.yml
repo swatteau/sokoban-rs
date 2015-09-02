@@ -1,0 +1,31 @@
+name: sokoban-rs
+version: 1.0.1
+about: An implementation of Sokoban in the Rust programming language.
+author: Sébastien Watteau
+
+settings:
+  - ArgRequiredElseHelp
+
+args:
+  - slc_file:
+      help: a Sokoban level collection (SLC) file
+      index: 1
+      required: true
+  - fullscreen:
+      help: Launches the game in fullscreen mode
+      short: f
+      long: fullscreen
+  - width:
+      help: The width of the window in pixels
+      short: w
+      long: width
+      takes_value: true
+      requires:
+        - height
+  - height:
+      help: The height of the window in pixels
+      short: h
+      long: height
+      takes_value: true
+      requires:
+        - width

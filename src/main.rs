@@ -28,7 +28,7 @@ use std::path::Path;
 use std::fs::File;
 use std::io::BufReader;
 use std::str::FromStr;
-use clap::{App, Arg};
+use clap::App;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2_image::INIT_PNG;
@@ -43,34 +43,8 @@ use game::Level;
 use render::Drawer;
 
 pub fn main() {
-    let matches = App::new("sokoban-rs")
-        .version("1.0.1")
-        .author("Sébastien Watteau")
-        .about("An implementation of Sokoban in the Rust programming language.")
-        .arg(Arg::with_name("slc_file")
-             .help("a Sokoban level collection (SLC) file")
-             .required(true)
-        )
-        .arg(Arg::with_name("fullscreen")
-             .help("Launches the game in fullscreen mode")
-             .short("f")
-             .long("fullscreen")
-        )
-        .arg(Arg::with_name("width")
-             .help("The width of the window in pixels")
-             .short("w")
-             .long("width")
-             .takes_value(true)
-             .requires("height")
-        )
-        .arg(Arg::with_name("height")
-             .help("The height of the window in pixels")
-             .short("h")
-             .long("height")
-             .takes_value(true)
-             .requires("width")
-        )
-        .get_matches();
+    let yml = load_yaml!("clap.yml");
+    let matches = App::from_yaml(yml).get_matches();
 
     let slc_file = matches.value_of("slc_file").unwrap();
 
