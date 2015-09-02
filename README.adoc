@@ -56,7 +56,7 @@ wget http://www.sourcecode.se/sokoban/download/microban.slc
 
 == Credits
 
-* "http://www.lostgarden.com/2007/05/dancs-miraculously-flexible-game.html[PlanetCute]" art by Daniel Cook (Lostgarden.com)
+* http://www.lostgarden.com/2007/05/dancs-miraculously-flexible-game.html["PlanetCute"] art by Daniel Cook (Lostgarden.com)
 * Ruji's Handwriting Font by Ruji C. (rujic.net)
 
 == License
