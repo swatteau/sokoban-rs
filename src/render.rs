@@ -22,7 +22,7 @@ use sdl2::render::{Renderer, Texture};
 use sdl2_image::LoadTexture;
 use sdl2_ttf::Font;
 
-use super::game::{Level, Position, Direction};
+use game::{Level, Position, Direction};
 
 /// The Drawer struct is responsible for drawing the game onto the screen.
 pub struct Drawer<'a> {
