@@ -17,6 +17,7 @@
 
 #[macro_use]
 extern crate bitflags;
+#[macro_use]
 extern crate clap;
 extern crate sdl2;
 extern crate sdl2_image;
@@ -73,18 +74,8 @@ pub fn main() {
 
     let slc_file = matches.value_of("slc_file").unwrap();
 
-    let width: u32 = matches.value_of("width")
-        .unwrap_or("1024")
-        .parse()
-        .unwrap_or_else(|err| {
-            panic!("Couldn't parse width as an integer: {}", err);
-        });
-    let height: u32 = matches.value_of("height")
-        .unwrap_or("768")
-        .parse()
-        .unwrap_or_else(|err| {
-            panic!("Couldn't parse height as an integer: {}", err);
-        });
+    let width = value_t!(matches.value_of("width"), u32).unwrap_or(1024);
+    let height = value_t!(matches.value_of("height"), u32).unwrap_or(768);
 
     let sdl_context = sdl2::init().unwrap_or_else(|err| {
         println!("Failed to initialize an SDL context: {}", err);
