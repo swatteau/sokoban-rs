@@ -1,6 +1,8 @@
+// This file is part of sokoban-rs v1.0.1
+// Copyright 2015 Sébastien Watteau
+
 image:https://travis-ci.org/swatteau/sokoban-rs.svg["Build Status", link="https://travis-ci.org/swatteau/sokoban-rs"]
-//image:http://meritbadge.herokuapp.com/sokoban-rs["Crates.io", link="https://crates.io/crates/sokoban-rs"]
-image:https://img.shields.io/badge/crates.io-v1.0.1-brightgreen.svg["crates.io", link="https://crates.io/crates/sokoban-rs"]
+image:http://meritbadge.herokuapp.com/sokoban-rs["Crates.io", link="https://crates.io/crates/sokoban-rs"]
 image:https://img.shields.io/badge/license-Apache%202-blue.svg["License", link="https://www.apache.org/licenses/LICENSE-2.0"]
 
 This is an implementation of Sokoban in the https://www.rust-lang.org[Rust Programming Language].
@@ -54,7 +56,8 @@ wget http://www.sourcecode.se/sokoban/download/microban.slc
 
 == Credits
 
-The graphics used in this game are from http://www.lostgarden.com/2007/05/dancs-miraculously-flexible-game.html[Danc's Miraculously Flexible Game Prototyping Tiles].
+* "http://www.lostgarden.com/2007/05/dancs-miraculously-flexible-game.html[PlanetCute]" art by Daniel Cook (Lostgarden.com)
+* Ruji's Handwriting Font by Ruji C. (rujic.net)
 
 == License
 
