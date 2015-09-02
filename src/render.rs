@@ -284,77 +284,41 @@ trait TileSet {
     }
 }
 
-/// Holds information about the big tileset.
-struct BigTileSet {
-    texture: Texture
-}
-
-impl BigTileSet {
-    /// Creates a new instance.
-    pub fn new(renderer: &Renderer) -> Self {
-        BigTileSet {
-            texture: renderer.load_texture(Path::new("assets/image/tileset.png")).unwrap()
+// A macro to generate the tilesets
+macro_rules! decl_tileset {
+    ($name:ident, $path:expr, $width:expr, $height:expr, $effective_height:expr, $offset:expr) => (
+        struct $name {
+            texture: Texture
         }
-    }
-}
-
-impl TileSet for BigTileSet {
-    fn texture(&self) -> &Texture {
-        &self.texture
-    }
-
-    fn tile_width(&self) -> u32 {
-        101
-    }
-
-    fn tile_height(&self) -> u32 {
-        171
-    }
-
-    fn tile_effective_height(&self) -> u32 {
-        83
-    }
-
-    fn tile_offset(&self) -> i32 {
-        40
-    }
-}
-
-/// Holds information about the small tileset.
-struct SmallTileSet {
-    texture: Texture
-}
-
-impl SmallTileSet {
-    /// Creates a new instance.
-    pub fn new(renderer: &Renderer) -> Self {
-        SmallTileSet {
-            texture: renderer.load_texture(Path::new("assets/image/tileset-small.png")).unwrap()
+        impl $name {
+            pub fn new(renderer: &Renderer) -> Self {
+                $name {
+                    texture: renderer.load_texture(Path::new($path)).unwrap()
+                }
+            }
         }
-    }
+        impl TileSet for $name {
+            fn texture(&self) -> &Texture {
+                &self.texture
+            }
+            fn tile_width(&self) -> u32 {
+                $width
+            }
+            fn tile_height(&self) -> u32 {
+                $height
+            }
+            fn tile_effective_height(&self) -> u32 {
+                $effective_height
+            }
+            fn tile_offset(&self) -> i32 {
+                $offset
+            }
+        }
+    )
 }
 
-impl TileSet for SmallTileSet {
-    fn texture(&self) -> &Texture {
-        &self.texture
-    }
-
-    fn tile_width(&self) -> u32 {
-        50
-    }
-
-    fn tile_height(&self) -> u32 {
-        85
-    }
-
-    fn tile_effective_height(&self) -> u32 {
-        41
-    }
-
-    fn tile_offset(&self) -> i32 {
-        20
-    }
-}
+decl_tileset!(BigTileSet, "assets/image/tileset.png", 101, 171, 83, 40);
+decl_tileset!(SmallTileSet, "assets/image/tileset-small.png", 50, 85, 41, 20);
 
 /// Enables switching between two tilesets.
 struct TileSetSwitch {
