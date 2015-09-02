@@ -1,6 +1,6 @@
 [root]
 name = "sokoban-rs"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "bitflags 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
