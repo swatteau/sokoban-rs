@@ -13,23 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PNG_FILES=Plain\ Block.png \
-          Brown\ Block.png \
-          Rock.png \
-          Character\ Boy.png \
-          Shadow\ North.png \
-          Shadow\ South.png \
-          Shadow\ East.png \
-          Shadow\ West.png \
-          Shadow\ North\ East.png \
-          Shadow\ North\ West.png \
-          Shadow\ South\ East.png \
-          Shadow\ South\ West.png \
-          Wall\ Block.png
+# The original tileset is from Danc's Miraculously Flexible Game Prototyping Tiles
+# (see http://www.lostgarden.com/2007/05/dancs-miraculously-flexible-game.html)
+PNG_ZIP_URL=http://lostgarden.com/PlanetCute%20PNG.zip
+PNG_ZIP=PlanetCute\ PNG.zip
+PNG_DIR=PlanetCute\ PNG
+PNG_FILES=$(PNG_DIR)/Plain\ Block.png \
+          $(PNG_DIR)/Brown\ Block.png \
+          $(PNG_DIR)/Rock.png \
+          $(PNG_DIR)/Character\ Boy.png \
+          $(PNG_DIR)/Shadow\ North.png \
+          $(PNG_DIR)/Shadow\ South.png \
+          $(PNG_DIR)/Shadow\ East.png \
+          $(PNG_DIR)/Shadow\ West.png \
+          $(PNG_DIR)/Shadow\ North\ East.png \
+          $(PNG_DIR)/Shadow\ North\ West.png \
+          $(PNG_DIR)/Shadow\ South\ East.png \
+          $(PNG_DIR)/Shadow\ South\ West.png \
+          $(PNG_DIR)/Wall\ Block.png
 
-.PHONY: clean all
+.PHONY: clean all fetch-png
 
-all: tileset.png tileset-small.png
+all: fetch-png tileset.png tileset-small.png
 
 tileset.png: $(PNG_FILES)
 	gm montage -geometry 101x171 -background none $(PNG_FILES) tileset.png
@@ -37,6 +42,10 @@ tileset.png: $(PNG_FILES)
 tileset-small.png: $(PNG_FILES)
 	gm montage -geometry 50x85 -background none $(PNG_FILES) tileset-small.png
 
+fetch-png:
+	wget $(PNG_ZIP_URL)
+	unzip $(PNG_ZIP)
+
 clean:
-	rm -f tileset.png tileset-small.png
+	rm -rf tileset.png tileset-small.png $(PNG_ZIP) $(PNG_DIR)
 
