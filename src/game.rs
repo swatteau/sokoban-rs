@@ -193,28 +193,28 @@ impl FromStr for Level {
                 '\n' => {
                     row += 1;
                     col = -1;
-                },
+                }
                 '#' => {
                     level.walls.insert(pos);
-                },
+                }
                 '.' => {
                     level.squares.insert(pos);
-                },
+                }
                 '$' => {
                     level.boxes.insert(pos);
-                },
+                }
                 '@' => {
                     level.player = pos;
-                },
+                }
                 '+' => {
                     level.player = pos;
                     level.squares.insert(pos);
-                },
+                }
                 '*' => {
                     level.boxes.insert(pos);
                     level.squares.insert(pos);
-                },
-                ' ' => {},
+                }
+                ' ' => {}
                 _ => {
                     return Err(InvalidChar(c, pos));
                 }

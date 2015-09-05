@@ -51,7 +51,10 @@ enum StatusBarLocation {
 impl<'a> Drawer<'a> {
     /// Creates a new Drawer instance.
     pub fn new(renderer: Renderer<'a>) -> Drawer {
-        let font = Font::from_file(Path::new("assets/font/RujisHandwritingFontv.2.0.ttf"), 20).unwrap();
+        let font = {
+            let ttf = Path::new("assets/font/RujisHandwritingFontv.2.0.ttf");
+            Font::from_file(&ttf, 20).unwrap()
+        };
         let screen_size = renderer.window().unwrap().drawable_size();
         let tileset = TileSetSwitch::new(&renderer);
         Drawer {
@@ -86,7 +89,8 @@ impl<'a> Drawer<'a> {
             .unwrap_or_else(|| panic!("Could not get the offscreen texture"));
 
         self.renderer.clear();
-        self.renderer.copy(&texture, Some(Rect::new_unwrap(0, 0, fullsize.0, fullsize.1)), final_rect);
+        let original_rect = Some(Rect::new_unwrap(0, 0, fullsize.0, fullsize.1));
+        self.renderer.copy(&texture, original_rect, final_rect);
 
         self.draw_status_bar(&level);
 
@@ -113,7 +117,8 @@ impl<'a> Drawer<'a> {
 
                 // Add the shadows
                 let flags = get_shadow_flags(&level, &pos);
-                for f in &[N_EDGE, S_EDGE, E_EDGE, W_EDGE, NE_CORNER, NW_CORNER, SE_CORNER, SW_CORNER] {
+                for f in &[N_EDGE, S_EDGE, E_EDGE, W_EDGE,
+                           NE_CORNER, NW_CORNER, SE_CORNER, SW_CORNER] {
                     if flags.contains(*f) {
                         self.draw_tile(Tile::Shadow(*f), x, y);
                     }
@@ -138,7 +143,10 @@ impl<'a> Drawer<'a> {
     fn draw_status_bar(&mut self, level: &Level) {
         let prev_color = self.renderer.draw_color();
         self.renderer.set_draw_color(self.bar_color);
-        let rect = Rect::new_unwrap(0, (self.screen_size.1 - self.bar_height) as i32, self.screen_size.0, self.bar_height);
+        let rect = Rect::new_unwrap(0,
+                                    (self.screen_size.1 - self.bar_height) as i32,
+                                    self.screen_size.0,
+                                    self.bar_height);
         self.renderer.fill_rect(rect);
         self.renderer.set_draw_color(prev_color);
 
@@ -162,10 +170,10 @@ impl<'a> Drawer<'a> {
         let (x, y) = match location {
             StatusBarLocation::FlushLeft => {
                 (margin as i32, (self.screen_size.1 - margin - h) as i32)
-            },
+            }
             StatusBarLocation::FlushRight => {
                 ((self.screen_size.0 - margin - w) as i32, (self.screen_size.1 - margin - h) as i32)
-            },
+            }
         };
         self.renderer.copy(&texture, None, Some(Rect::new_unwrap(x, y, w, h)));
     }
@@ -176,7 +184,11 @@ impl<'a> Drawer<'a> {
             panic!("No image for this tile: {:?}", tile);
         });
         let tile_rect = self.get_tile_rect(col, row);
-        self.renderer.copy(self.tileset.texture(), tile_rect, Some(Rect::new_unwrap(x, y, self.tileset.tile_width(), self.tileset.tile_height())));
+        let target_rect = Some(Rect::new_unwrap(x,
+                                                y,
+                                                self.tileset.tile_width(),
+                                                self.tileset.tile_height()));
+        self.renderer.copy(self.tileset.texture(), tile_rect, target_rect);
     }
 
     /// Returns the Rect of the tile located at the given row and column in the texture.
@@ -195,9 +207,7 @@ impl<'a> Drawer<'a> {
         let height_ratio = (h as f64) / (render_size.1 as f64);
         let ratio = f64::min(1.0, f64::min(width_ratio, height_ratio));
 
-        let scale = |sz: u32| {
-            (ratio * (sz as f64)).floor() as u32
-        };
+        let scale = |sz: u32| (ratio * (sz as f64)).floor() as u32;
 
         (scale(render_size.0), scale(render_size.1))
     }
@@ -247,20 +257,20 @@ trait TileSet {
     /// Returns the location of the tile in the tileset texture.
     fn location(&self, tile: Tile) -> Option<(u32, u32)> {
         match tile {
-           Tile::Floor => Some((0, 0)),
-           Tile::Wall => Some((0, 2)),
-           Tile::Rock => Some((2, 0)),
-           Tile::Square => Some((1, 0)),
-           Tile::Player => Some((3, 0)),
-           Tile::Shadow(N_EDGE) => Some((4, 0)),
-           Tile::Shadow(S_EDGE) => Some((5, 0)),
-           Tile::Shadow(E_EDGE) => Some((0, 1)),
-           Tile::Shadow(W_EDGE) => Some((1, 1)),
-           Tile::Shadow(NE_CORNER) => Some((2, 1)),
-           Tile::Shadow(NW_CORNER) => Some((3, 1)),
-           Tile::Shadow(SE_CORNER) => Some((4, 1)),
-           Tile::Shadow(SW_CORNER) => Some((5, 1)),
-           Tile::Shadow(ShadowFlags { .. }) => None,
+            Tile::Floor => Some((0, 0)),
+            Tile::Wall => Some((0, 2)),
+            Tile::Rock => Some((2, 0)),
+            Tile::Square => Some((1, 0)),
+            Tile::Player => Some((3, 0)),
+            Tile::Shadow(N_EDGE) => Some((4, 0)),
+            Tile::Shadow(S_EDGE) => Some((5, 0)),
+            Tile::Shadow(E_EDGE) => Some((0, 1)),
+            Tile::Shadow(W_EDGE) => Some((1, 1)),
+            Tile::Shadow(NE_CORNER) => Some((2, 1)),
+            Tile::Shadow(NW_CORNER) => Some((3, 1)),
+            Tile::Shadow(SE_CORNER) => Some((4, 1)),
+            Tile::Shadow(SW_CORNER) => Some((5, 1)),
+            Tile::Shadow(ShadowFlags { .. }) => None,
         }
     }
 

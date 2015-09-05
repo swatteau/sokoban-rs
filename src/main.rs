@@ -105,7 +105,7 @@ pub fn main() {
                     level = l;
                     reference_level = level.clone();
                     skip = false;
-                },
+                }
                 None => {
                     break;
                 }
@@ -116,7 +116,7 @@ pub fn main() {
         match event_pump.wait_event() {
             Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                 running = false
-            },
+            }
             Event::KeyDown { keycode: Some(Keycode::Left), .. } => {
                 level.step(game::Direction::Left);
             }
@@ -162,7 +162,7 @@ fn load_slc_file(path: &Path) -> Result<Vec<Level>, error::SokobanError> {
                         level_title = id.value.clone();
                     }
                 }
-            },
+            }
             XmlEvent::EndElement { name } => {
                 if name.local_name == "Level" {
                     let mut level = try!(Level::from_str(&level_str));
@@ -170,7 +170,7 @@ fn load_slc_file(path: &Path) -> Result<Vec<Level>, error::SokobanError> {
                     collection.push(level);
                     level_str.clear();
                 }
-            },
+            }
             XmlEvent::Characters(ref data) => {
                 if reading_level {
                     level_str.push_str(data);

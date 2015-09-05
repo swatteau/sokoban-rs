@@ -31,10 +31,10 @@ impl error::Error for SokobanError {
         match *self {
             SokobanError::IoError(..) => {
                 "I/O error"
-            },
+            }
             SokobanError::ParseError(..) => {
                 "Level parsing error"
-            },
+            }
         }
     }
 }
@@ -44,7 +44,7 @@ impl Display for SokobanError {
         match *self {
             SokobanError::IoError(ref err) => {
                 write!(f, "{}", *err)
-            },
+            }
             SokobanError::ParseError(ref err) => {
                 write!(f, "{}", *err)
             }
@@ -63,4 +63,3 @@ impl From<game::InvalidChar> for SokobanError {
         SokobanError::ParseError(err)
     }
 }
-
