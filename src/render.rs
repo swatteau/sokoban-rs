@@ -183,20 +183,12 @@ impl<'a> Drawer<'a> {
         let (col, row) = self.tileset.location(tile).unwrap_or_else(|| {
             panic!("No image for this tile: {:?}", tile);
         });
-        let tile_rect = self.get_tile_rect(col, row);
+        let tile_rect = self.tileset.get_tile_rect(col, row);
         let target_rect = Some(Rect::new_unwrap(x,
                                                 y,
                                                 self.tileset.tile_width(),
                                                 self.tileset.tile_height()));
         self.renderer.copy(self.tileset.texture(), tile_rect, target_rect);
-    }
-
-    /// Returns the Rect of the tile located at the given row and column in the texture.
-    fn get_tile_rect(&self, col: u32, row: u32) -> Option<Rect> {
-        let (w, h) = (self.tileset.tile_width(), self.tileset.tile_height());
-        let x = (col * w) as i32;
-        let y = (row * h) as i32;
-        Some(Rect::new_unwrap(x, y, w, h))
     }
 
     /// Returns the size of the drawing scaled to fit onto the screen.
@@ -292,6 +284,15 @@ trait TileSet {
         };
         (width, height)
     }
+
+    /// Returns the Rect of the tile located at the given row and column in the texture.
+    fn get_tile_rect(&self, col: u32, row: u32) -> Option<Rect> {
+        let (w, h) = (self.tile_width(), self.tile_height());
+        let x = (col * w) as i32;
+        let y = (row * h) as i32;
+        Some(Rect::new_unwrap(x, y, w, h))
+    }
+
 }
 
 // A macro to generate the tilesets
