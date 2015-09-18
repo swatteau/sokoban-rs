@@ -103,9 +103,9 @@ impl<'a> Drawer<'a> {
         self.renderer.set_draw_color(Color::RGB(0, 0, 0));
         self.renderer.clear();
 
-        for j in (0..rows) {
-            for i in (0..cols) {
-                let pos = Position::new(j, i);
+        for r in (0..rows) {
+            for c in (0..cols) {
+                let pos = Position::new(r, c);
                 let (x, y) = self.tileset.get_coordinates(&pos);
 
                 // First draw the floor tiles
