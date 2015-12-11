@@ -20,7 +20,7 @@ use sdl2::rect::Rect;
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::render::{Renderer, Texture};
 use sdl2_image::LoadTexture;
-use sdl2_ttf::Font;
+use sdl2_ttf::{self, Font};
 
 use game::{Level, Position, Direction};
 
@@ -160,7 +160,7 @@ impl<'a> Drawer<'a> {
 
     /// Draws text in the status bar
     fn draw_status_text(&mut self, text: &str, location: StatusBarLocation) {
-        let surface = self.font.render_str_blended(text, self.bar_text_color).unwrap();
+        let surface = self.font.render(text, sdl2_ttf::blended(self.bar_text_color)).unwrap();
         let texture = self.renderer.create_texture_from_surface(&surface).unwrap();
         let margin = 4;
         let (w, h) = {

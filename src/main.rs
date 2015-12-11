@@ -33,7 +33,7 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2_image::INIT_PNG;
 use xml::reader::EventReader;
-use xml::reader::events::*;
+use xml::reader::XmlEvent;
 
 pub mod error;
 pub mod game;
@@ -72,7 +72,7 @@ pub fn main() {
         .unwrap_or_else(|err| panic!("Failed to get an SDL renderer for the main window: {}", err));
 
     sdl2_image::init(INIT_PNG);
-    sdl2_ttf::init();
+    let _ttf = sdl2_ttf::init();
 
     let mut drawer = Drawer::new(renderer);
 
@@ -125,7 +125,6 @@ pub fn main() {
             _ => {}
         }
     }
-    sdl2_ttf::quit();
     sdl2_image::quit();
 }
 
@@ -134,14 +133,14 @@ fn load_slc_file(path: &Path) -> Result<Vec<Level>, error::SokobanError> {
     let mut collection = Vec::new();
     let file = try!(File::open(&path));
     let reader = BufReader::new(file);
-    let mut parser = EventReader::new(reader);
+    let parser = EventReader::new(reader);
 
     let mut level_title = String::new();
     let mut level_str = String::new();
     let mut reading_level = false;
-    for e in parser.events() {
+    for e in parser {
         match e {
-            XmlEvent::StartElement { ref name, ref attributes, .. } => {
+            Ok(XmlEvent::StartElement { ref name, ref attributes, .. }) => {
                 if name.local_name == "L" {
                     reading_level = true;
                 } else if name.local_name == "Level" {
@@ -150,7 +149,7 @@ fn load_slc_file(path: &Path) -> Result<Vec<Level>, error::SokobanError> {
                     }
                 }
             }
-            XmlEvent::EndElement { name } => {
+            Ok(XmlEvent::EndElement { name }) => {
                 if name.local_name == "Level" {
                     let mut level = try!(Level::from_str(&level_str));
                     level.set_title(level_title.clone());
@@ -158,7 +157,7 @@ fn load_slc_file(path: &Path) -> Result<Vec<Level>, error::SokobanError> {
                     level_str.clear();
                 }
             }
-            XmlEvent::Characters(ref data) => {
+            Ok(XmlEvent::Characters(ref data)) => {
                 if reading_level {
                     level_str.push_str(data);
                     level_str.push('\n');
