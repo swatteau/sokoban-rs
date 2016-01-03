@@ -74,19 +74,23 @@ impl<'a> Drawer<'a> {
 
         // Draw a full-size image onto an off-screen buffer
         let fullsize = self.tileset.get_rendering_size(level.extents());
-        let _ = self.renderer.render_target()
-            .expect("Render targets are not supported")
-            .create_and_set(PixelFormatEnum::RGBA8888, fullsize);
+        let _ = self.renderer
+                    .render_target()
+                    .expect("Render targets are not supported")
+                    .create_and_set(PixelFormatEnum::RGBA8888, fullsize);
 
         self.draw_fullsize(level);
 
         // Copy onto the screen with appropriate scaling
         let final_rect = self.get_centered_image_rect(self.get_scaled_rendering_size(&level));
-        let texture = self.renderer.render_target()
-            .unwrap()
-            .reset()
-            .unwrap_or_else(|err| panic!("Could not reset to the default render target: {}", err))
-            .unwrap_or_else(|| panic!("Could not get the offscreen texture"));
+        let texture = self.renderer
+                          .render_target()
+                          .unwrap()
+                          .reset()
+                          .unwrap_or_else(|err| {
+                              panic!("Could not reset to the default render target: {}", err)
+                          })
+                          .unwrap_or_else(|| panic!("Could not get the offscreen texture"));
 
         self.renderer.clear();
         let original_rect = Some(Rect::new_unwrap(0, 0, fullsize.0, fullsize.1));
@@ -117,8 +121,8 @@ impl<'a> Drawer<'a> {
 
                 // Add the shadows
                 let flags = get_shadow_flags(&level, &pos);
-                for f in &[N_EDGE, S_EDGE, E_EDGE, W_EDGE,
-                           NE_CORNER, NW_CORNER, SE_CORNER, SW_CORNER] {
+                for f in &[N_EDGE, S_EDGE, E_EDGE, W_EDGE, NE_CORNER, NW_CORNER, SE_CORNER,
+                           SW_CORNER] {
                     if flags.contains(*f) {
                         self.draw_tile(Tile::Shadow(*f), x, y);
                     }
@@ -172,7 +176,8 @@ impl<'a> Drawer<'a> {
                 (margin as i32, (self.screen_size.1 - margin - h) as i32)
             }
             StatusBarLocation::FlushRight => {
-                ((self.screen_size.0 - margin - w) as i32, (self.screen_size.1 - margin - h) as i32)
+                ((self.screen_size.0 - margin - w) as i32,
+                 (self.screen_size.1 - margin - h) as i32)
             }
         };
         self.renderer.copy(&texture, None, Some(Rect::new_unwrap(x, y, w, h)));

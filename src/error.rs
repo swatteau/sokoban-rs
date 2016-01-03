@@ -29,12 +29,8 @@ pub enum SokobanError {
 impl error::Error for SokobanError {
     fn description(&self) -> &str {
         match *self {
-            SokobanError::IoError(..) => {
-                "I/O error"
-            }
-            SokobanError::ParseError(..) => {
-                "Level parsing error"
-            }
+            SokobanError::IoError(..) => "I/O error",
+            SokobanError::ParseError(..) => "Level parsing error",
         }
     }
 }
@@ -42,12 +38,8 @@ impl error::Error for SokobanError {
 impl Display for SokobanError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match *self {
-            SokobanError::IoError(ref err) => {
-                write!(f, "{}", *err)
-            }
-            SokobanError::ParseError(ref err) => {
-                write!(f, "{}", *err)
-            }
+            SokobanError::IoError(ref err) => write!(f, "{}", *err),
+            SokobanError::ParseError(ref err) => write!(f, "{}", *err),
         }
     }
 }

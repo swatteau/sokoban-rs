@@ -50,11 +50,14 @@ pub fn main() {
     let width = value_t!(matches.value_of("width"), u32).unwrap_or(1024);
     let height = value_t!(matches.value_of("height"), u32).unwrap_or(768);
 
-    let sdl_context = sdl2::init()
-        .unwrap_or_else(|err| panic!("Failed to initialize an SDL context: {}", err));
+    let sdl_context = sdl2::init().unwrap_or_else(|err| {
+        panic!("Failed to initialize an SDL context: {}", err)
+    });
 
     let video_subsystem = sdl_context.video()
-        .unwrap_or_else(|err| panic!("Failed to initialize the video subsystem: {}", err));
+                                     .unwrap_or_else(|err| {
+                                         panic!("Failed to initialize the video subsystem: {}", err)
+                                     });
 
     let mut window_builder = video_subsystem.window("sokoban-rs", width, height);
     if matches.is_present("fullscreen") {
@@ -64,12 +67,16 @@ pub fn main() {
     }
 
     let window = window_builder.opengl()
-        .build()
-        .unwrap_or_else(|err| panic!("Failed to create the window: {}", err));
+                               .build()
+                               .unwrap_or_else(|err| {
+                                   panic!("Failed to create the window: {}", err)
+                               });
 
     let renderer = window.renderer()
-        .build()
-        .unwrap_or_else(|err| panic!("Failed to get an SDL renderer for the main window: {}", err));
+                         .build()
+                         .unwrap_or_else(|err| {
+                             panic!("Failed to get an SDL renderer for the main window: {}", err)
+                         });
 
     sdl2_image::init(INIT_PNG);
     let _ttf = sdl2_ttf::init();
@@ -77,8 +84,8 @@ pub fn main() {
     let mut drawer = Drawer::new(renderer);
 
     let mut collection = load_slc_file(Path::new(&slc_file))
-        .unwrap_or_else(|err| panic!("{}", err))
-        .into_iter();
+                             .unwrap_or_else(|err| panic!("{}", err))
+                             .into_iter();
     let mut reference_level = collection.next().unwrap();
     let mut level = reference_level.clone();
 
