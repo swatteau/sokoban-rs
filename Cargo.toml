@@ -10,9 +10,9 @@ license = "Apache-2.0"
 
 [dependencies]
 bitflags = "0.3.3"
-sdl2 = "0.12.0"
-sdl2_image = "0.6.0"
-sdl2_ttf = "0.10.0"
+sdl2 = "0.16.0"
+sdl2_image = "0.16.0"
+sdl2_ttf = "0.16.0"
 xml-rs = "0.2.2"
 clap = { version = "1.5.3", features = ["yaml"] }
 
