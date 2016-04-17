@@ -20,7 +20,7 @@ use sdl2::rect::Rect;
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::render::{Renderer, Texture};
 use sdl2_image::LoadTexture;
-use sdl2_ttf::{self, Font};
+use sdl2_ttf::{Font, Sdl2TtfContext};
 
 use game::{Level, Position, Direction};
 
@@ -50,10 +50,10 @@ enum StatusBarLocation {
 
 impl<'a> Drawer<'a> {
     /// Creates a new Drawer instance.
-    pub fn new(renderer: Renderer<'a>) -> Drawer {
+    pub fn new(renderer: Renderer<'a>, ttf_context: &Sdl2TtfContext) -> Drawer<'a> {
         let font = {
             let ttf = Path::new("assets/font/RujisHandwritingFontv.2.0.ttf");
-            Font::from_file(&ttf, 20).unwrap()
+            ttf_context.load_font(&ttf, 20).unwrap()
         };
         let screen_size = renderer.window().unwrap().drawable_size();
         let tileset = TileSetSwitch::new(&renderer);
@@ -77,7 +77,7 @@ impl<'a> Drawer<'a> {
         let _ = self.renderer
                     .render_target()
                     .expect("Render targets are not supported")
-                    .create_and_set(PixelFormatEnum::RGBA8888, fullsize);
+                    .create_and_set(PixelFormatEnum::RGBA8888, fullsize.0, fullsize.1);
 
         self.draw_fullsize(level);
 
@@ -93,7 +93,7 @@ impl<'a> Drawer<'a> {
                           .unwrap_or_else(|| panic!("Could not get the offscreen texture"));
 
         self.renderer.clear();
-        let original_rect = Some(Rect::new_unwrap(0, 0, fullsize.0, fullsize.1));
+        let original_rect = Some(Rect::new(0, 0, fullsize.0, fullsize.1));
         self.renderer.copy(&texture, original_rect, final_rect);
 
         self.draw_status_bar(&level);
@@ -147,11 +147,11 @@ impl<'a> Drawer<'a> {
     fn draw_status_bar(&mut self, level: &Level) {
         let prev_color = self.renderer.draw_color();
         self.renderer.set_draw_color(self.bar_color);
-        let rect = Rect::new_unwrap(0,
-                                    (self.screen_size.1 - self.bar_height) as i32,
-                                    self.screen_size.0,
-                                    self.bar_height);
-        self.renderer.fill_rect(rect);
+        let rect = Rect::new(0,
+                             (self.screen_size.1 - self.bar_height) as i32,
+                             self.screen_size.0,
+                             self.bar_height);
+        self.renderer.fill_rect(rect).unwrap();
         self.renderer.set_draw_color(prev_color);
 
         // Draw the number of moves
@@ -164,7 +164,7 @@ impl<'a> Drawer<'a> {
 
     /// Draws text in the status bar
     fn draw_status_text(&mut self, text: &str, location: StatusBarLocation) {
-        let surface = self.font.render(text, sdl2_ttf::blended(self.bar_text_color)).unwrap();
+        let surface = self.font.render(text).blended(self.bar_text_color).unwrap();
         let texture = self.renderer.create_texture_from_surface(&surface).unwrap();
         let margin = 4;
         let (w, h) = {
@@ -180,7 +180,7 @@ impl<'a> Drawer<'a> {
                  (self.screen_size.1 - margin - h) as i32)
             }
         };
-        self.renderer.copy(&texture, None, Some(Rect::new_unwrap(x, y, w, h)));
+        self.renderer.copy(&texture, None, Some(Rect::new(x, y, w, h)));
     }
 
     /// Draws a tile at the given coordinates.
@@ -189,10 +189,10 @@ impl<'a> Drawer<'a> {
             panic!("No image for this tile: {:?}", tile);
         });
         let tile_rect = self.tileset.get_tile_rect(col, row);
-        let target_rect = Some(Rect::new_unwrap(x,
-                                                y,
-                                                self.tileset.tile_width(),
-                                                self.tileset.tile_height()));
+        let target_rect = Some(Rect::new(x,
+                                         y,
+                                         self.tileset.tile_width(),
+                                         self.tileset.tile_height()));
         self.renderer.copy(self.tileset.texture(), tile_rect, target_rect);
     }
 
@@ -213,7 +213,7 @@ impl<'a> Drawer<'a> {
     fn get_centered_image_rect(&self, img_size: (u32, u32)) -> Option<Rect> {
         let x = (self.screen_size.0 - img_size.0) as i32 / 2;
         let y = (self.screen_size.1 - self.bar_height - img_size.1) as i32 / 2;
-        Some(Rect::new_unwrap(x, y, img_size.0, img_size.1))
+        Some(Rect::new(x, y, img_size.0, img_size.1))
     }
 }
 
@@ -295,7 +295,7 @@ trait TileSet {
         let (w, h) = (self.tile_width(), self.tile_height());
         let x = (col * w) as i32;
         let y = (row * h) as i32;
-        Some(Rect::new_unwrap(x, y, w, h))
+        Some(Rect::new(x, y, w, h))
     }
 
 }

@@ -78,10 +78,10 @@ pub fn main() {
                              panic!("Failed to get an SDL renderer for the main window: {}", err)
                          });
 
-    sdl2_image::init(INIT_PNG);
-    let _ttf = sdl2_ttf::init();
+    let _image_context = sdl2_image::init(INIT_PNG).unwrap();
+    let ttf_context = sdl2_ttf::init().unwrap();
 
-    let mut drawer = Drawer::new(renderer);
+    let mut drawer = Drawer::new(renderer, &ttf_context);
 
     let mut collection = load_slc_file(Path::new(&slc_file))
                              .unwrap_or_else(|err| panic!("{}", err))
@@ -132,7 +132,6 @@ pub fn main() {
             _ => {}
         }
     }
-    sdl2_image::quit();
 }
 
 /// Builds levels from a level collection file in the SLC format.
