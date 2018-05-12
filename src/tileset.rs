@@ -61,22 +61,22 @@ impl<'a> Tileset<'a> {
     }
 
     /// Returns the width of a tile.
-    pub fn tile_width(&self) -> u32 {
+    pub fn width(&self) -> u32 {
         self.width
     }
 
     /// Returns the height of a tile.
-    pub fn tile_height(&self) -> u32 {
+    pub fn height(&self) -> u32 {
         self.height
     }
 
     /// Returns the effective height of a tile (used for stacking)
-    pub fn tile_effective_height(&self) -> u32 {
+    pub fn effective_height(&self) -> u32 {
         self.effective_height
     }
 
     /// Returns the offset need to draw items on the floor.
-    pub fn tile_offset(&self) -> i32 {
+    pub fn offset(&self) -> i32 {
         self.offset
     }
 
@@ -103,16 +103,16 @@ impl<'a> Tileset<'a> {
     /// Returns the top-left corner coordinates of the tile corresponding
     /// to the given position.
     pub fn get_coordinates(&self, pos: &Position) -> (i32, i32) {
-        let x = self.tile_width() as i32 * pos.column();
-        let y = self.tile_effective_height() as i32 * pos.row();
+        let x = self.width as i32 * pos.column();
+        let y = self.effective_height as i32 * pos.row();
         (x, y)
     }
 
     /// Returns the full size needed to draw a level of the given dimensions.
     pub fn get_rendering_size(&self, extents: (i32, i32)) -> (u32, u32) {
-        let width = extents.0 as u32 * self.tile_width();
+        let width = extents.0 as u32 * self.width;
         let height = if extents.1 > 0 {
-            self.tile_height() + (extents.1 - 1) as u32 * self.tile_effective_height()
+            self.height + (extents.1 - 1) as u32 * self.effective_height
         } else {
             0
         };
@@ -121,7 +121,7 @@ impl<'a> Tileset<'a> {
 
     /// Returns the Rect of the tile located at the given row and column in the texture.
     pub fn get_tile_rect(&self, col: u32, row: u32) -> Option<Rect> {
-        let (w, h) = (self.tile_width(), self.tile_height());
+        let (w, h) = (self.width, self.height);
         let x = (col * w) as i32;
         let y = (row * h) as i32;
         Some(Rect::new(x, y, w, h))

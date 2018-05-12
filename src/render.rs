@@ -136,7 +136,7 @@ impl<'a> Drawer<'a> {
                 }
 
                 // Draw the other items
-                let z = y - self.tileset().tile_offset();
+                let z = y - self.tileset().offset();
                 if level.is_wall(&pos) {
                     self.draw_tile(canvas, Tile::Wall, x, z);
                 }
@@ -209,8 +209,8 @@ impl<'a> Drawer<'a> {
         let target_rect = Some(Rect::new(
             x,
             y,
-            self.tileset().tile_width(),
-            self.tileset().tile_height(),
+            self.tileset().width(),
+            self.tileset().height(),
         ));
         canvas
             .copy(self.tileset().texture(), tile_rect, target_rect)
