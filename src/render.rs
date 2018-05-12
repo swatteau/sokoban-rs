@@ -74,7 +74,7 @@ impl<'a> Drawer<'a> {
         self.tileset.set_extents(level.extents());
 
         // Draw a full-size image onto an off-screen buffer
-        let fullsize = self.tileset.select().get_rendering_size(level.extents());
+        let fullsize = self.tileset().get_rendering_size(level.extents());
         let creator = canvas.texture_creator();
         let mut texture = creator
             .create_texture_target(PixelFormatEnum::RGBA8888, fullsize.0, fullsize.1)
@@ -107,7 +107,7 @@ impl<'a> Drawer<'a> {
         for r in 0..rows {
             for c in 0..cols {
                 let pos = Position::new(r, c);
-                let (x, y) = self.tileset.select().get_coordinates(&pos);
+                let (x, y) = self.tileset().get_coordinates(&pos);
 
                 // First draw the floor tiles
                 if level.is_square(&pos) {
@@ -134,7 +134,7 @@ impl<'a> Drawer<'a> {
                 }
 
                 // Draw the other items
-                let z = y - self.tileset.select().tile_offset();
+                let z = y - self.tileset().tile_offset();
                 if level.is_wall(&pos) {
                     self.draw_tile(canvas, Tile::Wall, x, z);
                 }
@@ -200,24 +200,24 @@ impl<'a> Drawer<'a> {
 
     /// Draws a tile at the given coordinates.
     fn draw_tile(&mut self, canvas: &mut Canvas<Window>, tile: Tile, x: i32, y: i32) {
-        let (col, row) = self.tileset.select().location(tile).unwrap_or_else(|| {
+        let (col, row) = self.tileset().location(tile).unwrap_or_else(|| {
             panic!("No image for this tile: {:?}", tile);
         });
-        let tile_rect = self.tileset.select().get_tile_rect(col, row);
+        let tile_rect = self.tileset().get_tile_rect(col, row);
         let target_rect = Some(Rect::new(
             x,
             y,
-            self.tileset.select().tile_width(),
-            self.tileset.select().tile_height(),
+            self.tileset().tile_width(),
+            self.tileset().tile_height(),
         ));
         canvas
-            .copy(self.tileset.select().texture(), tile_rect, target_rect)
+            .copy(self.tileset().texture(), tile_rect, target_rect)
             .unwrap();
     }
 
     /// Returns the size of the drawing scaled to fit onto the screen.
     fn get_scaled_rendering_size(&self, level: &Level) -> (u32, u32) {
-        let render_size = self.tileset.select().get_rendering_size(level.extents());
+        let render_size = self.tileset().get_rendering_size(level.extents());
         let width_ratio = (self.screen_size.0 as f64) / (render_size.0 as f64);
         let h = self.screen_size.1 - self.bar_height;
         let height_ratio = (h as f64) / (render_size.1 as f64);
@@ -233,6 +233,10 @@ impl<'a> Drawer<'a> {
         let x = (self.screen_size.0 - img_size.0) as i32 / 2;
         let y = (self.screen_size.1 - self.bar_height - img_size.1) as i32 / 2;
         Some(Rect::new(x, y, img_size.0, img_size.1))
+    }
+
+    fn tileset(&self) -> &TileSet {
+        self.tileset.select()
     }
 }
 
