@@ -37,9 +37,12 @@ use xml::reader::XmlEvent;
 pub mod error;
 pub mod game;
 pub mod render;
+pub mod shadow;
+pub mod tileset;
 
 use game::Level;
 use render::Drawer;
+use tileset::Tileset;
 
 pub fn main() {
     let yml = load_yaml!("clap.yml");
@@ -80,11 +83,14 @@ pub fn main() {
     let big_texture = creator
         .load_texture(Path::new("assets/image/tileset.png"))
         .unwrap();
+    let big_tileset = Tileset::new(big_texture, 101, 171, 83, 40);
+    let small_tileset = Tileset::new(small_texture, 50, 85, 41, 20);
+
 
     let _image_context = sdl2::image::init(INIT_PNG).unwrap();
     let ttf_context = sdl2::ttf::init().unwrap();
 
-    let mut drawer = Drawer::new(&mut canvas, &big_texture, &small_texture, &ttf_context);
+    let mut drawer = Drawer::new(&mut canvas, big_tileset, small_tileset, &ttf_context);
 
     let mut collection = load_slc_file(Path::new(&slc_file))
         .unwrap_or_else(|err| panic!("{}", err))

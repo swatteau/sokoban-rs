@@ -15,13 +15,14 @@
 
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::rect::Rect;
-use sdl2::render::{Canvas, Texture};
+use sdl2::render::Canvas;
 use sdl2::ttf::{Font, Sdl2TtfContext};
 use sdl2::video::Window;
-use std::cmp;
 use std::path::Path;
 
 use game::{Direction, Level, Position};
+use shadow::ShadowFlags;
+use tileset::{Tile, Tileset, TilesetSelector};
 
 /// The Drawer struct is responsible for drawing the game onto the screen.
 pub struct Drawer<'a> {
@@ -49,17 +50,14 @@ impl<'a> Drawer<'a> {
     /// Creates a new Drawer instance.
     pub fn new(
         canvas: &mut Canvas<Window>,
-        big: &'a Texture,
-        small: &'a Texture,
+        big_tileset: Tileset<'a>,
+        small_tileset: Tileset<'a>,
         ttf_context: &'a Sdl2TtfContext,
     ) -> Drawer<'a> {
         let font = {
             let ttf = Path::new("assets/font/RujisHandwritingFontv.2.0.ttf");
             ttf_context.load_font(&ttf, 20).unwrap()
         };
-
-        let big_tileset = Tileset::new(big, 101, 171, 83, 40);
-        let small_tileset = Tileset::new(small, 50, 85, 41, 20);
 
         let screen_size = canvas.window().drawable_size();
         let selector = TilesetSelector::new(big_tileset, small_tileset);
@@ -243,175 +241,6 @@ impl<'a> Drawer<'a> {
         self.selector.select()
     }
 }
-
-/// Represents a kind of tile.
-#[derive(Copy, Clone, Debug)]
-enum Tile {
-    /// Standard floor tile
-    Floor,
-    /// Wall tile
-    Wall,
-    /// Rock tile
-    Rock,
-    /// Target square tile
-    Square,
-    /// Player tile
-    Player,
-    /// Shadow tile
-    Shadow(ShadowFlags),
-}
-
-struct Tileset<'a> {
-    texture: &'a Texture<'a>,
-    width: u32,
-    height: u32,
-    effective_height: u32,
-    offset: i32,
-}
-
-impl<'a> Tileset<'a> {
-    pub fn new(texture: &'a Texture, width: u32, height: u32, effective_height: u32, offset: i32) -> Tileset<'a> {
-        Tileset { 
-            texture: texture,
-            width: width,
-            height: height,
-            effective_height: effective_height,
-            offset: offset,
-        }
-    }
-
-    /// Returns the associated texture
-    fn texture(&self) -> &Texture {
-        &self.texture
-    }
-
-    /// Returns the width of a tile.
-    fn tile_width(&self) -> u32 {
-        self.width
-    }
-
-    /// Returns the height of a tile.
-    fn tile_height(&self) -> u32 {
-        self.height
-    }
-
-    /// Returns the effective height of a tile (used for stacking)
-    fn tile_effective_height(&self) -> u32 {
-        self.effective_height
-    }
-
-    /// Returns the offset need to draw items on the floor.
-    fn tile_offset(&self) -> i32 {
-        self.offset
-    }
-
-    /// Returns the location of the tile in the tileset texture.
-    fn location(&self, tile: Tile) -> Option<(u32, u32)> {
-        match tile {
-            Tile::Floor => Some((0, 0)),
-            Tile::Wall => Some((0, 2)),
-            Tile::Rock => Some((2, 0)),
-            Tile::Square => Some((1, 0)),
-            Tile::Player => Some((3, 0)),
-            Tile::Shadow(ShadowFlags::N_EDGE) => Some((4, 0)),
-            Tile::Shadow(ShadowFlags::S_EDGE) => Some((5, 0)),
-            Tile::Shadow(ShadowFlags::E_EDGE) => Some((0, 1)),
-            Tile::Shadow(ShadowFlags::W_EDGE) => Some((1, 1)),
-            Tile::Shadow(ShadowFlags::NE_CORNER) => Some((2, 1)),
-            Tile::Shadow(ShadowFlags::NW_CORNER) => Some((3, 1)),
-            Tile::Shadow(ShadowFlags::SE_CORNER) => Some((4, 1)),
-            Tile::Shadow(ShadowFlags::SW_CORNER) => Some((5, 1)),
-            Tile::Shadow(ShadowFlags { .. }) => None,
-        }
-    }
-
-    /// Returns the top-left corner coordinates of the tile corresponding
-    /// to the given position.
-    fn get_coordinates(&self, pos: &Position) -> (i32, i32) {
-        let x = self.tile_width() as i32 * pos.column();
-        let y = self.tile_effective_height() as i32 * pos.row();
-        (x, y)
-    }
-
-    /// Returns the full size needed to draw a level of the given dimensions.
-    fn get_rendering_size(&self, extents: (i32, i32)) -> (u32, u32) {
-        let width = extents.0 as u32 * self.tile_width();
-        let height = if extents.1 > 0 {
-            self.tile_height() + (extents.1 - 1) as u32 * self.tile_effective_height()
-        } else {
-            0
-        };
-        (width, height)
-    }
-
-    /// Returns the Rect of the tile located at the given row and column in the texture.
-    fn get_tile_rect(&self, col: u32, row: u32) -> Option<Rect> {
-        let (w, h) = (self.tile_width(), self.tile_height());
-        let x = (col * w) as i32;
-        let y = (row * h) as i32;
-        Some(Rect::new(x, y, w, h))
-    }
-}
-
-/// Enables selecting between two tilesets.
-struct TilesetSelector<'a> {
-    /// The extents of the current level
-    extents: (i32, i32),
-    /// The small tileset
-    tileset_small: Tileset<'a>,
-    /// The big tileset
-    tileset_big: Tileset<'a>,
-}
-
-impl<'a> TilesetSelector<'a> {
-
-    const THRESHOLD: i32 = 40;
-
-    /// Creates a new instance.
-    pub fn new(big: Tileset<'a>, small: Tileset<'a>) -> Self {
-        TilesetSelector {
-            extents: (0, 0),
-            tileset_big: big,
-            tileset_small: small,
-        }
-    }
-
-    /// Resets the selector with the given extents.
-    pub fn reset(&mut self, extents: (i32, i32)) {
-        self.extents = extents;
-    }
-
-    pub fn select(&self) -> &Tileset {
-        if cmp::max(self.extents.0, self.extents.1) > TilesetSelector::THRESHOLD {
-            &self.tileset_small
-        } else {
-            &self.tileset_big
-        }
-    }
-}
-
-bitflags!(
-    /// Represents the different kind of shadows that can be cast
-    /// onto a floor tile.
-    struct ShadowFlags: i32 {
-        /// North edge
-        const N_EDGE = 0x1;
-        /// South edge
-        const S_EDGE = 0x2;
-        /// East edge
-        const E_EDGE = 0x4;
-        /// West edge
-        const W_EDGE = 0x8;
-        /// North East corner
-        const NE_CORNER = 0x10;
-        /// North West corner
-        const NW_CORNER = 0x20;
-        /// South East corner
-        const SE_CORNER = 0x40;
-        /// South West corner
-        const SW_CORNER = 0x80;
-    }
-);
 
 /// Returns the shadow flags for a particular position in the given level.
 fn get_shadow_flags(level: &Level, pos: &Position) -> ShadowFlags {
