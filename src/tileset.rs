@@ -132,10 +132,10 @@ impl<'a> Tileset<'a> {
 pub struct TilesetSelector<'a> {
     /// The extents of the current level
     extents: (i32, i32),
-    /// The small tileset
-    tileset_small: Tileset<'a>,
     /// The big tileset
-    tileset_big: Tileset<'a>,
+    big_set: Tileset<'a>,
+    /// The small tileset
+    small_set: Tileset<'a>,
 }
 
 impl<'a> TilesetSelector<'a> {
@@ -143,11 +143,11 @@ impl<'a> TilesetSelector<'a> {
     const THRESHOLD: i32 = 40;
 
     /// Creates a new instance.
-    pub fn new(big: Tileset<'a>, small: Tileset<'a>) -> Self {
+    pub fn new(big_set: Tileset<'a>, small_set: Tileset<'a>) -> Self {
         TilesetSelector {
             extents: (0, 0),
-            tileset_big: big,
-            tileset_small: small,
+            big_set: big_set,
+            small_set: small_set,
         }
     }
 
@@ -158,9 +158,9 @@ impl<'a> TilesetSelector<'a> {
 
     pub fn select(&self) -> &Tileset {
         if cmp::max(self.extents.0, self.extents.1) > TilesetSelector::THRESHOLD {
-            &self.tileset_small
+            &self.small_set
         } else {
-            &self.tileset_big
+            &self.big_set
         }
     }
 }

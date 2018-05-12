@@ -50,8 +50,8 @@ impl<'a> Drawer<'a> {
     /// Creates a new Drawer instance.
     pub fn new(
         canvas: &mut Canvas<Window>,
-        big_tileset: Tileset<'a>,
-        small_tileset: Tileset<'a>,
+        big_set: Tileset<'a>,
+        small_set: Tileset<'a>,
         ttf_context: &'a Sdl2TtfContext,
     ) -> Drawer<'a> {
         let font = {
@@ -60,7 +60,7 @@ impl<'a> Drawer<'a> {
         };
 
         let screen_size = canvas.window().drawable_size();
-        let selector = TilesetSelector::new(big_tileset, small_tileset);
+        let selector = TilesetSelector::new(big_set, small_set);
         Drawer {
             selector: selector,
             font: font,

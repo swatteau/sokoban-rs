@@ -27,6 +27,8 @@ use sdl2::event::Event;
 use sdl2::image::LoadTexture;
 use sdl2::image::INIT_PNG;
 use sdl2::keyboard::Keycode;
+use sdl2::render::TextureCreator;
+use sdl2::video::WindowContext;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -77,20 +79,15 @@ pub fn main() {
         .unwrap_or_else(|err| panic!("Failed to get an SDL canvas for the main window: {}", err));
 
     let creator = canvas.texture_creator();
-    let small_texture = creator
-        .load_texture(Path::new("assets/image/tileset-small.png"))
-        .unwrap();
-    let big_texture = creator
-        .load_texture(Path::new("assets/image/tileset.png"))
-        .unwrap();
-    let big_tileset = Tileset::new(big_texture, 101, 171, 83, 40);
-    let small_tileset = Tileset::new(small_texture, 50, 85, 41, 20);
-
 
     let _image_context = sdl2::image::init(INIT_PNG).unwrap();
     let ttf_context = sdl2::ttf::init().unwrap();
 
-    let mut drawer = Drawer::new(&mut canvas, big_tileset, small_tileset, &ttf_context);
+    let mut drawer = {
+        let big_set = load_tileset(&creator, "assets/image/tileset.png", 101, 171, 83, 40);
+        let small_set = load_tileset(&creator, "assets/image/tileset-small.png", 50, 85, 41, 20);
+        Drawer::new(&mut canvas, big_set, small_set, &ttf_context)
+    };
 
     let mut collection = load_slc_file(Path::new(&slc_file))
         .unwrap_or_else(|err| panic!("{}", err))
@@ -161,6 +158,13 @@ pub fn main() {
             _ => {}
         }
     }
+}
+
+fn load_tileset<P: AsRef<Path>>(texture_creator: &TextureCreator<WindowContext>, path: P, width: u32, height: u32, effective_height: u32, offset: i32) -> Tileset {
+    let texture = texture_creator
+        .load_texture(path.as_ref())
+        .unwrap();
+    Tileset::new(texture, width, height, effective_height, offset)
 }
 
 /// Builds levels from a level collection file in the SLC format.
