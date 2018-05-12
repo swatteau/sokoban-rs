@@ -52,8 +52,8 @@ pub fn main() {
     let matches = App::from_yaml(yml).get_matches();
 
     let slc_file = matches.value_of("slc_file").unwrap();
-    let mut collection = load_slc_file(Path::new(&slc_file))
-        .unwrap_or_else(|err| panic!("{}", err));
+    let mut collection =
+        load_slc_file(Path::new(&slc_file)).unwrap_or_else(|err| panic!("{}", err));
 
     let sdl_context =
         sdl2::init().unwrap_or_else(|err| panic!("Failed to initialize an SDL context: {}", err));
@@ -71,15 +71,34 @@ pub fn main() {
     let texture_creator = canvas.texture_creator();
 
     let mut painter = {
-        let big_set = load_tileset(&texture_creator, "assets/image/tileset.png", 101, 171, 83, 40);
-        let small_set = load_tileset(&texture_creator, "assets/image/tileset-small.png", 50, 85, 41, 20);
+        let big_set = load_tileset(
+            &texture_creator,
+            "assets/image/tileset.png",
+            101,
+            171,
+            83,
+            40,
+        );
+        let small_set = load_tileset(
+            &texture_creator,
+            "assets/image/tileset-small.png",
+            50,
+            85,
+            41,
+            20,
+        );
         Painter::new(&mut canvas, big_set, small_set, &ttf_context)
     };
 
     mainloop(&sdl_context, &collection, painter, &mut canvas);
 }
 
-fn mainloop(sdl_context: &Sdl, levels: &[Level], mut painter: Painter, canvas: &mut Canvas<Window>) {
+fn mainloop(
+    sdl_context: &Sdl,
+    levels: &[Level],
+    mut painter: Painter,
+    canvas: &mut Canvas<Window>,
+) {
     let mut collection = levels.into_iter();
     let mut reference_level = collection.next().unwrap();
     let mut level = reference_level.clone();
@@ -172,10 +191,15 @@ fn get_window(sdl_context: &Sdl, matches: &ArgMatches) -> Window {
     window
 }
 
-fn load_tileset<P: AsRef<Path>>(texture_creator: &TextureCreator<WindowContext>, path: P, width: u32, height: u32, effective_height: u32, offset: i32) -> Tileset {
-    let texture = texture_creator
-        .load_texture(path.as_ref())
-        .unwrap();
+fn load_tileset<P: AsRef<Path>>(
+    texture_creator: &TextureCreator<WindowContext>,
+    path: P,
+    width: u32,
+    height: u32,
+    effective_height: u32,
+    offset: i32,
+) -> Tileset {
+    let texture = texture_creator.load_texture(path.as_ref()).unwrap();
     Tileset::new(texture, width, height, effective_height, offset)
 }
 

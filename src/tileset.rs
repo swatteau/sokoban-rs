@@ -13,11 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::cmp;
+use game::Position;
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
 use shadow::ShadowFlags;
-use game::Position;
+use std::cmp;
 
 /// Represents a kind of tile.
 #[derive(Copy, Clone, Debug)]
@@ -45,8 +45,14 @@ pub struct Tileset<'a> {
 }
 
 impl<'a> Tileset<'a> {
-    pub fn new(texture: Texture<'a>, width: u32, height: u32, effective_height: u32, offset: i32) -> Tileset<'a> {
-        Tileset { 
+    pub fn new(
+        texture: Texture<'a>,
+        width: u32,
+        height: u32,
+        effective_height: u32,
+        offset: i32,
+    ) -> Tileset<'a> {
+        Tileset {
             texture: texture,
             width: width,
             height: height,
@@ -139,7 +145,6 @@ pub struct TilesetSelector<'a> {
 }
 
 impl<'a> TilesetSelector<'a> {
-
     const THRESHOLD: i32 = 40;
 
     /// Creates a new instance.
