@@ -16,7 +16,6 @@
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::rect::Rect;
 use sdl2::render::{Canvas, Texture};
-use sdl2::image::LoadTexture;
 use sdl2::ttf::{Font, Sdl2TtfContext};
 use sdl2::video::Window;
 use std::cmp;
@@ -28,7 +27,7 @@ use game::{Direction, Level, Position};
 /// The Drawer struct is responsible for drawing the game onto the screen.
 pub struct Drawer<'a> {
     /// The underlying SDL renderer
-    renderer: Canvas<Window>,
+    renderer: &'a mut Canvas<Window>,
     /// The active tileset
     tileset: TileSetSwitch<'a>,
     /// The font used to display text
@@ -51,13 +50,13 @@ enum StatusBarLocation {
 
 impl<'a> Drawer<'a> {
     /// Creates a new Drawer instance.
-    pub fn new(renderer: Canvas<Window>, ttf_context: &'a Sdl2TtfContext) -> Drawer<'a> {
+    pub fn new(renderer: &'a mut Canvas<Window>, big: &'a Texture, small: &'a Texture, ttf_context: &'a Sdl2TtfContext) -> Drawer<'a> {
         let font = {
             let ttf = Path::new("assets/font/RujisHandwritingFontv.2.0.ttf");
             ttf_context.load_font(&ttf, 20).unwrap()
         };
         let screen_size = renderer.window().drawable_size();
-        let tileset = TileSetSwitch::new(&renderer);
+        let tileset = TileSetSwitch::new(big, small);
         Drawer {
             renderer: renderer,
             tileset: tileset,
@@ -329,12 +328,10 @@ trait TileSet {
 macro_rules! decl_tileset {
     ($name:ident, $path:expr, $width:expr, $height:expr, $effective_height:expr, $offset:expr) => {
         struct $name<'a> {
-            texture: Texture<'a>,
+            texture: &'a Texture<'a>,
         }
         impl<'a> $name<'a> {
-            pub fn new(renderer: &Canvas<Window>) -> Self {
-                let creator = renderer.texture_creator();
-                let texture = creator.load_texture(Path::new($path)).unwrap();
+            pub fn new(texture: &'a Texture) -> Self {
                 $name {
                     texture: texture,
                 }
@@ -384,12 +381,12 @@ struct TileSetSwitch<'a> {
 
 impl<'a> TileSetSwitch<'a> {
     /// Creates a new instance.
-    pub fn new(renderer: &Canvas<Window>) -> Self {
+    pub fn new(big: &'a Texture, small: &'a Texture) -> Self {
         TileSetSwitch {
             limit: 40,
             extents: (0, 0),
-            tileset_big: BigTileSet::new(renderer),
-            tileset_small: SmallTileSet::new(renderer),
+            tileset_big: BigTileSet::new(big),
+            tileset_small: SmallTileSet::new(small),
         }
     }
 

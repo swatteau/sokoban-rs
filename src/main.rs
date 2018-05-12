@@ -26,6 +26,7 @@ use clap::App;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::image::INIT_PNG;
+use sdl2::image::LoadTexture;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -67,15 +68,19 @@ pub fn main() {
         .build()
         .unwrap_or_else(|err| panic!("Failed to create the window: {}", err));
 
-    let canvas = window
+    let mut canvas = window
         .into_canvas()
         .build()
         .unwrap_or_else(|err| panic!("Failed to get an SDL canvas for the main window: {}", err));
 
+    let creator = canvas.texture_creator();
+    let small_texture = creator.load_texture(Path::new("assets/image/tileset-small.png")).unwrap();
+    let big_texture = creator.load_texture(Path::new("assets/image/tileset.png")).unwrap();
+
     let _image_context = sdl2::image::init(INIT_PNG).unwrap();
     let ttf_context = sdl2::ttf::init().unwrap();
 
-    let mut drawer = Drawer::new(canvas, &ttf_context);
+    let mut drawer = Drawer::new(&mut canvas, &big_texture, &small_texture, &ttf_context);
 
     let mut collection = load_slc_file(Path::new(&slc_file))
         .unwrap_or_else(|err| panic!("{}", err))
