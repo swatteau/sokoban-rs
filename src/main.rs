@@ -22,13 +22,14 @@ extern crate clap;
 extern crate sdl2;
 extern crate xml;
 
-use clap::App;
+use clap::{App, ArgMatches};
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
 use sdl2::image::INIT_PNG;
 use sdl2::keyboard::Keycode;
 use sdl2::render::TextureCreator;
-use sdl2::video::WindowContext;
+use sdl2::video::{Window, WindowContext};
+use sdl2::Sdl;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -51,27 +52,11 @@ pub fn main() {
     let matches = App::from_yaml(yml).get_matches();
 
     let slc_file = matches.value_of("slc_file").unwrap();
-    let width = value_t!(matches.value_of("width"), u32).unwrap_or(1024);
-    let height = value_t!(matches.value_of("height"), u32).unwrap_or(768);
 
     let sdl_context =
         sdl2::init().unwrap_or_else(|err| panic!("Failed to initialize an SDL context: {}", err));
 
-    let video_subsystem = sdl_context
-        .video()
-        .unwrap_or_else(|err| panic!("Failed to initialize the video subsystem: {}", err));
-
-    let mut window_builder = video_subsystem.window("sokoban-rs", width, height);
-    if matches.is_present("fullscreen") {
-        window_builder.fullscreen();
-    } else {
-        window_builder.position_centered();
-    }
-
-    let window = window_builder
-        .opengl()
-        .build()
-        .unwrap_or_else(|err| panic!("Failed to create the window: {}", err));
+    let window = get_window(&sdl_context, &matches);
 
     let mut canvas = window
         .into_canvas()
@@ -158,6 +143,29 @@ pub fn main() {
             _ => {}
         }
     }
+}
+
+fn get_window(sdl_context: &Sdl, matches: &ArgMatches) -> Window {
+    let width = value_t!(matches.value_of("width"), u32).unwrap_or(1024);
+    let height = value_t!(matches.value_of("height"), u32).unwrap_or(768);
+
+    let video_subsystem = sdl_context
+        .video()
+        .unwrap_or_else(|err| panic!("Failed to initialize the video subsystem: {}", err));
+
+    let mut window_builder = video_subsystem.window("sokoban-rs", width, height);
+    if matches.is_present("fullscreen") {
+        window_builder.fullscreen();
+    } else {
+        window_builder.position_centered();
+    }
+
+    let window = window_builder
+        .opengl()
+        .build()
+        .unwrap_or_else(|err| panic!("Failed to create the window: {}", err));
+
+    window
 }
 
 fn load_tileset<P: AsRef<Path>>(texture_creator: &TextureCreator<WindowContext>, path: P, width: u32, height: u32, effective_height: u32, offset: i32) -> Tileset {
