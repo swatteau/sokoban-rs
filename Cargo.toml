@@ -9,7 +9,7 @@ keywords = ["game", "sokoban"]
 license = "Apache-2.0"
 
 [dependencies]
-bitflags = "0.6.0"
+bitflags = "1.0.3"
 sdl2 = "0.25.0"
 sdl2_image = "0.25.0"
 sdl2_ttf = "0.25.0"

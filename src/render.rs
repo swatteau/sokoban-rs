@@ -121,8 +121,8 @@ impl<'a> Drawer<'a> {
 
                 // Add the shadows
                 let flags = get_shadow_flags(&level, &pos);
-                for f in &[N_EDGE, S_EDGE, E_EDGE, W_EDGE, NE_CORNER, NW_CORNER, SE_CORNER,
-                           SW_CORNER] {
+                for f in &[ShadowFlags::N_EDGE, ShadowFlags::S_EDGE, ShadowFlags::E_EDGE, ShadowFlags::W_EDGE, ShadowFlags::NE_CORNER, ShadowFlags::NW_CORNER, ShadowFlags::SE_CORNER,
+                           ShadowFlags::SW_CORNER] {
                     if flags.contains(*f) {
                         self.draw_tile(Tile::Shadow(*f), x, y);
                     }
@@ -259,14 +259,14 @@ trait TileSet {
             Tile::Rock => Some((2, 0)),
             Tile::Square => Some((1, 0)),
             Tile::Player => Some((3, 0)),
-            Tile::Shadow(N_EDGE) => Some((4, 0)),
-            Tile::Shadow(S_EDGE) => Some((5, 0)),
-            Tile::Shadow(E_EDGE) => Some((0, 1)),
-            Tile::Shadow(W_EDGE) => Some((1, 1)),
-            Tile::Shadow(NE_CORNER) => Some((2, 1)),
-            Tile::Shadow(NW_CORNER) => Some((3, 1)),
-            Tile::Shadow(SE_CORNER) => Some((4, 1)),
-            Tile::Shadow(SW_CORNER) => Some((5, 1)),
+            Tile::Shadow(ShadowFlags::N_EDGE) => Some((4, 0)),
+            Tile::Shadow(ShadowFlags::S_EDGE) => Some((5, 0)),
+            Tile::Shadow(ShadowFlags::E_EDGE) => Some((0, 1)),
+            Tile::Shadow(ShadowFlags::W_EDGE) => Some((1, 1)),
+            Tile::Shadow(ShadowFlags::NE_CORNER) => Some((2, 1)),
+            Tile::Shadow(ShadowFlags::NW_CORNER) => Some((3, 1)),
+            Tile::Shadow(ShadowFlags::SE_CORNER) => Some((4, 1)),
+            Tile::Shadow(ShadowFlags::SW_CORNER) => Some((5, 1)),
             Tile::Shadow(ShadowFlags { .. }) => None,
         }
     }
@@ -380,23 +380,23 @@ impl Deref for TileSetSwitch {
 bitflags!(
     /// Represents the different kind of shadows that can be cast
     /// onto a floor tile.
-    flags ShadowFlags: i32 {
+    struct ShadowFlags: i32 {
         /// North edge
-        const N_EDGE = 0x1,
+        const N_EDGE = 0x1;
         /// South edge
-        const S_EDGE = 0x2,
+        const S_EDGE = 0x2;
         /// East edge
-        const E_EDGE = 0x4,
+        const E_EDGE = 0x4;
         /// West edge
-        const W_EDGE = 0x8,
+        const W_EDGE = 0x8;
         /// North East corner
-        const NE_CORNER = 0x10,
+        const NE_CORNER = 0x10;
         /// North West corner
-        const NW_CORNER = 0x20,
+        const NW_CORNER = 0x20;
         /// South East corner
-        const SE_CORNER = 0x40,
+        const SE_CORNER = 0x40;
         /// South West corner
-        const SW_CORNER = 0x80,
+        const SW_CORNER = 0x80;
     }
 );
 
@@ -409,28 +409,28 @@ fn get_shadow_flags(level: &Level, pos: &Position) -> ShadowFlags {
 
     let mut flags = ShadowFlags::empty();
     if level.is_wall(&north) {
-        flags = flags | N_EDGE;
+        flags = flags | ShadowFlags::N_EDGE;
     }
     if level.is_wall(&south) {
-        flags = flags | S_EDGE;
+        flags = flags | ShadowFlags::S_EDGE;
     }
     if level.is_wall(&west) {
-        flags = flags | W_EDGE;
+        flags = flags | ShadowFlags::W_EDGE;
     }
     if level.is_wall(&east) {
-        flags = flags | E_EDGE;
+        flags = flags | ShadowFlags::E_EDGE;
     }
-    if level.is_wall(&north.neighbor(Direction::Right)) && !flags.intersects(N_EDGE | E_EDGE) {
-        flags = flags | NE_CORNER;
+    if level.is_wall(&north.neighbor(Direction::Right)) && !flags.intersects(ShadowFlags::N_EDGE | ShadowFlags::E_EDGE) {
+        flags = flags | ShadowFlags::NE_CORNER;
     }
-    if level.is_wall(&north.neighbor(Direction::Left)) && !flags.intersects(N_EDGE | W_EDGE) {
-        flags = flags | NW_CORNER;
+    if level.is_wall(&north.neighbor(Direction::Left)) && !flags.intersects(ShadowFlags::N_EDGE | ShadowFlags::W_EDGE) {
+        flags = flags | ShadowFlags::NW_CORNER;
     }
-    if level.is_wall(&south.neighbor(Direction::Right)) && !flags.intersects(S_EDGE | E_EDGE) {
-        flags = flags | SE_CORNER;
+    if level.is_wall(&south.neighbor(Direction::Right)) && !flags.intersects(ShadowFlags::S_EDGE | ShadowFlags::E_EDGE) {
+        flags = flags | ShadowFlags::SE_CORNER;
     }
-    if level.is_wall(&south.neighbor(Direction::Left)) && !flags.intersects(S_EDGE | W_EDGE) {
-        flags = flags | SW_CORNER;
+    if level.is_wall(&south.neighbor(Direction::Left)) && !flags.intersects(ShadowFlags::S_EDGE | ShadowFlags::W_EDGE) {
+        flags = flags | ShadowFlags::SW_CORNER;
     }
     flags
 }

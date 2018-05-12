@@ -180,7 +180,7 @@ dependencies = [
 name = "sokoban-rs"
 version = "1.1.0"
 dependencies = [
- "bitflags 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bitflags 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.31.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "sdl2 0.25.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sdl2_image 0.25.0 (registry+https://github.com/rust-lang/crates.io-index)",
