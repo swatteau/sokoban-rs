@@ -14,5 +14,5 @@ sdl2 = "0.25.0"
 sdl2_image = "0.25.0"
 sdl2_ttf = "0.25.0"
 xml-rs = "0.7.0"
-clap = { version = "1.5.5", features = ["yaml"] }
+clap = { version = "2.31.2", features = ["yaml"] }
 
