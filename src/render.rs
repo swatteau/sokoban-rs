@@ -94,7 +94,7 @@ impl<'a> Drawer<'a> {
 
         self.renderer.clear();
         let original_rect = Some(Rect::new(0, 0, fullsize.0, fullsize.1));
-        self.renderer.copy(&texture, original_rect, final_rect);
+        self.renderer.copy(&texture, original_rect, final_rect).unwrap();
 
         self.draw_status_bar(&level);
 
@@ -180,7 +180,7 @@ impl<'a> Drawer<'a> {
                  (self.screen_size.1 - margin - h) as i32)
             }
         };
-        self.renderer.copy(&texture, None, Some(Rect::new(x, y, w, h)));
+        self.renderer.copy(&texture, None, Some(Rect::new(x, y, w, h))).unwrap();
     }
 
     /// Draws a tile at the given coordinates.
@@ -193,7 +193,7 @@ impl<'a> Drawer<'a> {
                                          y,
                                          self.tileset.tile_width(),
                                          self.tileset.tile_height()));
-        self.renderer.copy(self.tileset.texture(), tile_rect, target_rect);
+        self.renderer.copy(self.tileset.texture(), tile_rect, target_rect).unwrap();
     }
 
     /// Returns the size of the drawing scaled to fit onto the screen.
