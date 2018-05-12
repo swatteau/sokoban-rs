@@ -38,12 +38,12 @@ use xml::reader::XmlEvent;
 
 pub mod error;
 pub mod game;
-pub mod render;
+pub mod painter;
 pub mod shadow;
 pub mod tileset;
 
 use game::Level;
-use render::Drawer;
+use painter::Painter;
 use tileset::Tileset;
 
 pub fn main() {
@@ -83,10 +83,10 @@ pub fn main() {
     let _image_context = sdl2::image::init(INIT_PNG).unwrap();
     let ttf_context = sdl2::ttf::init().unwrap();
 
-    let mut drawer = {
+    let mut painter = {
         let big_set = load_tileset(&creator, "assets/image/tileset.png", 101, 171, 83, 40);
         let small_set = load_tileset(&creator, "assets/image/tileset-small.png", 50, 85, 41, 20);
-        Drawer::new(&mut canvas, big_set, small_set, &ttf_context)
+        Painter::new(&mut canvas, big_set, small_set, &ttf_context)
     };
 
     let mut collection = load_slc_file(Path::new(&slc_file))
@@ -111,7 +111,7 @@ pub fn main() {
                 }
             }
         }
-        drawer.draw(&mut canvas, &level);
+        painter.draw(&mut canvas, &level);
 
         match event_pump.wait_event() {
             Event::Quit { .. }

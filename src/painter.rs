@@ -24,8 +24,8 @@ use game::{Direction, Level, Position};
 use shadow::ShadowFlags;
 use tileset::{Tile, Tileset, TilesetSelector};
 
-/// The Drawer struct is responsible for drawing the game onto the screen.
-pub struct Drawer<'a> {
+/// The Painter struct is responsible for drawing the game onto the screen.
+pub struct Painter<'a> {
     /// The tileset selector
     selector: TilesetSelector<'a>,
     /// The font used to display text
@@ -46,14 +46,14 @@ enum StatusBarLocation {
     FlushRight,
 }
 
-impl<'a> Drawer<'a> {
-    /// Creates a new Drawer instance.
+impl<'a> Painter<'a> {
+    /// Creates a new instance.
     pub fn new(
         canvas: &mut Canvas<Window>,
         big_set: Tileset<'a>,
         small_set: Tileset<'a>,
         ttf_context: &'a Sdl2TtfContext,
-    ) -> Drawer<'a> {
+    ) -> Painter<'a> {
         let font = {
             let ttf = Path::new("assets/font/RujisHandwritingFontv.2.0.ttf");
             ttf_context.load_font(&ttf, 20).unwrap()
@@ -61,7 +61,7 @@ impl<'a> Drawer<'a> {
 
         let screen_size = canvas.window().drawable_size();
         let selector = TilesetSelector::new(big_set, small_set);
-        Drawer {
+        Painter {
             selector: selector,
             font: font,
             screen_size: screen_size,
