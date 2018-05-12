@@ -25,8 +25,8 @@ use game::{Direction, Level, Position};
 
 /// The Drawer struct is responsible for drawing the game onto the screen.
 pub struct Drawer<'a> {
-    /// The active tileset
-    tileset: TileSetSwitch<'a>,
+    /// The tileset selector
+    selector: TilesetSelector<'a>,
     /// The font used to display text
     font: Font<'a, 'a>,
     /// The size of the screen in pixels
@@ -58,9 +58,9 @@ impl<'a> Drawer<'a> {
             ttf_context.load_font(&ttf, 20).unwrap()
         };
         let screen_size = canvas.window().drawable_size();
-        let tileset = TileSetSwitch::new(big, small);
+        let selector = TilesetSelector::new(big, small);
         Drawer {
-            tileset: tileset,
+            selector: selector,
             font: font,
             screen_size: screen_size,
             bar_height: 32,
@@ -71,7 +71,7 @@ impl<'a> Drawer<'a> {
 
     /// Draws a level onto the screen.
     pub fn draw(&mut self, canvas: &mut Canvas<Window>, level: &Level) {
-        self.tileset.set_extents(level.extents());
+        self.selector.reset(level.extents());
 
         // Draw a full-size image onto an off-screen buffer
         let fullsize = self.tileset().get_rendering_size(level.extents());
@@ -236,7 +236,7 @@ impl<'a> Drawer<'a> {
     }
 
     fn tileset(&self) -> &TileSet {
-        self.tileset.select()
+        self.selector.select()
     }
 }
 
@@ -363,10 +363,8 @@ decl_tileset!(
     20
 );
 
-/// Enables switching between two tilesets.
-struct TileSetSwitch<'a> {
-    /// The limit value for switching
-    limit: i32,
+/// Enables selecting between two tilesets.
+struct TilesetSelector<'a> {
     /// The extents of the current level
     extents: (i32, i32),
     /// The small tileset
@@ -375,24 +373,26 @@ struct TileSetSwitch<'a> {
     tileset_big: BigTileSet<'a>,
 }
 
-impl<'a> TileSetSwitch<'a> {
+impl<'a> TilesetSelector<'a> {
+
+    const THRESHOLD: i32 = 40;
+
     /// Creates a new instance.
     pub fn new(big: &'a Texture, small: &'a Texture) -> Self {
-        TileSetSwitch {
-            limit: 40,
+        TilesetSelector {
             extents: (0, 0),
             tileset_big: BigTileSet::new(big),
             tileset_small: SmallTileSet::new(small),
         }
     }
 
-    /// Updates the switch with the given extents.
-    pub fn set_extents(&mut self, extents: (i32, i32)) {
+    /// Resets the selector with the given extents.
+    pub fn reset(&mut self, extents: (i32, i32)) {
         self.extents = extents;
     }
 
     pub fn select(&self) -> &TileSet {
-        if cmp::max(self.extents.0, self.extents.1) > self.limit {
+        if cmp::max(self.extents.0, self.extents.1) > TilesetSelector::THRESHOLD {
             &self.tileset_small
         } else {
             &self.tileset_big
