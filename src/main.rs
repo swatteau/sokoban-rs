@@ -20,14 +20,12 @@ extern crate bitflags;
 #[macro_use]
 extern crate clap;
 extern crate sdl2;
-extern crate sdl2_image;
-extern crate sdl2_ttf;
 extern crate xml;
 
 use clap::App;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2_image::INIT_PNG;
+use sdl2::image::INIT_PNG;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -69,15 +67,15 @@ pub fn main() {
         .build()
         .unwrap_or_else(|err| panic!("Failed to create the window: {}", err));
 
-    let renderer = window
-        .renderer()
+    let canvas = window
+        .into_canvas()
         .build()
-        .unwrap_or_else(|err| panic!("Failed to get an SDL renderer for the main window: {}", err));
+        .unwrap_or_else(|err| panic!("Failed to get an SDL canvas for the main window: {}", err));
 
-    let _image_context = sdl2_image::init(INIT_PNG).unwrap();
-    let ttf_context = sdl2_ttf::init().unwrap();
+    let _image_context = sdl2::image::init(INIT_PNG).unwrap();
+    let ttf_context = sdl2::ttf::init().unwrap();
 
-    let mut drawer = Drawer::new(renderer, &ttf_context);
+    let mut drawer = Drawer::new(canvas, &ttf_context);
 
     let mut collection = load_slc_file(Path::new(&slc_file))
         .unwrap_or_else(|err| panic!("{}", err))

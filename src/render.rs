@@ -15,9 +15,10 @@
 
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::rect::Rect;
-use sdl2::render::{Renderer, Texture};
-use sdl2_image::LoadTexture;
-use sdl2_ttf::{Font, Sdl2TtfContext};
+use sdl2::render::{Canvas, Texture};
+use sdl2::image::LoadTexture;
+use sdl2::ttf::{Font, Sdl2TtfContext};
+use sdl2::video::Window;
 use std::cmp;
 use std::ops::Deref;
 use std::path::Path;
@@ -27,11 +28,11 @@ use game::{Direction, Level, Position};
 /// The Drawer struct is responsible for drawing the game onto the screen.
 pub struct Drawer<'a> {
     /// The underlying SDL renderer
-    renderer: Renderer<'a>,
+    renderer: Canvas<Window>,
     /// The active tileset
-    tileset: TileSetSwitch,
+    tileset: TileSetSwitch<'a>,
     /// The font used to display text
-    font: Font<'a>,
+    font: Font<'a, 'a>,
     /// The size of the screen in pixels
     screen_size: (u32, u32),
     /// The height of the status bar
@@ -50,12 +51,12 @@ enum StatusBarLocation {
 
 impl<'a> Drawer<'a> {
     /// Creates a new Drawer instance.
-    pub fn new(renderer: Renderer<'a>, ttf_context: &'a Sdl2TtfContext) -> Drawer<'a> {
+    pub fn new(renderer: Canvas<Window>, ttf_context: &'a Sdl2TtfContext) -> Drawer<'a> {
         let font = {
             let ttf = Path::new("assets/font/RujisHandwritingFontv.2.0.ttf");
             ttf_context.load_font(&ttf, 20).unwrap()
         };
-        let screen_size = renderer.window().unwrap().drawable_size();
+        let screen_size = renderer.window().drawable_size();
         let tileset = TileSetSwitch::new(&renderer);
         Drawer {
             renderer: renderer,
@@ -74,21 +75,29 @@ impl<'a> Drawer<'a> {
 
         // Draw a full-size image onto an off-screen buffer
         let fullsize = self.tileset.get_rendering_size(level.extents());
+        /*
         let _ = self.renderer
             .render_target()
             .expect("Render targets are not supported")
             .create_and_set(PixelFormatEnum::RGBA8888, fullsize.0, fullsize.1);
+            */
+        let creator = self.renderer.texture_creator();
+        let texture = creator
+            .create_texture_target(PixelFormatEnum::RGBA8888, fullsize.0, fullsize.1)
+            .expect("Could not get texture target for off-screen rendering");
 
         self.draw_fullsize(level);
 
         // Copy onto the screen with appropriate scaling
         let final_rect = self.get_centered_image_rect(self.get_scaled_rendering_size(&level));
+        /*
         let texture = self.renderer
             .render_target()
             .unwrap()
             .reset()
             .unwrap_or_else(|err| panic!("Could not reset to the default render target: {}", err))
             .unwrap_or_else(|| panic!("Could not get the offscreen texture"));
+            */
 
         self.renderer.clear();
         let original_rect = Some(Rect::new(0, 0, fullsize.0, fullsize.1));
@@ -175,7 +184,8 @@ impl<'a> Drawer<'a> {
     /// Draws text in the status bar
     fn draw_status_text(&mut self, text: &str, location: StatusBarLocation) {
         let surface = self.font.render(text).blended(self.bar_text_color).unwrap();
-        let texture = self.renderer.create_texture_from_surface(&surface).unwrap();
+        let creator = self.renderer.texture_creator();
+        let texture = creator.create_texture_from_surface(&surface).unwrap();
         let margin = 4;
         let (w, h) = {
             let q = texture.query();
@@ -318,17 +328,19 @@ trait TileSet {
 // A macro to generate the tilesets
 macro_rules! decl_tileset {
     ($name:ident, $path:expr, $width:expr, $height:expr, $effective_height:expr, $offset:expr) => {
-        struct $name {
-            texture: Texture,
+        struct $name<'a> {
+            texture: Texture<'a>,
         }
-        impl $name {
-            pub fn new(renderer: &Renderer) -> Self {
+        impl<'a> $name<'a> {
+            pub fn new(renderer: &Canvas<Window>) -> Self {
+                let creator = renderer.texture_creator();
+                let texture = creator.load_texture(Path::new($path)).unwrap();
                 $name {
-                    texture: renderer.load_texture(Path::new($path)).unwrap(),
+                    texture: texture,
                 }
             }
         }
-        impl TileSet for $name {
+        impl<'a> TileSet for $name<'a> {
             fn texture(&self) -> &Texture {
                 &self.texture
             }
@@ -359,20 +371,20 @@ decl_tileset!(
 );
 
 /// Enables switching between two tilesets.
-struct TileSetSwitch {
+struct TileSetSwitch<'a> {
     /// The limit value for switching
     limit: i32,
     /// The extents of the current level
     extents: (i32, i32),
     /// The small tileset
-    tileset_small: SmallTileSet,
+    tileset_small: SmallTileSet<'a>,
     /// The big tileset
-    tileset_big: BigTileSet,
+    tileset_big: BigTileSet<'a>,
 }
 
-impl TileSetSwitch {
+impl<'a> TileSetSwitch<'a> {
     /// Creates a new instance.
-    pub fn new(renderer: &Renderer) -> Self {
+    pub fn new(renderer: &Canvas<Window>) -> Self {
         TileSetSwitch {
             limit: 40,
             extents: (0, 0),
@@ -388,8 +400,8 @@ impl TileSetSwitch {
 }
 
 // Select the appropriate tileset while dereferencing
-impl Deref for TileSetSwitch {
-    type Target = TileSet;
+impl<'a> Deref for TileSetSwitch<'a> {
+    type Target = TileSet + 'a;
     fn deref(&self) -> &Self::Target {
         if cmp::max(self.extents.0, self.extents.1) > self.limit {
             &self.tileset_small
