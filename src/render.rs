@@ -48,7 +48,12 @@ enum StatusBarLocation {
 
 impl<'a> Drawer<'a> {
     /// Creates a new Drawer instance.
-    pub fn new(canvas: &mut Canvas<Window>, big: &'a Texture, small: &'a Texture, ttf_context: &'a Sdl2TtfContext) -> Drawer<'a> {
+    pub fn new(
+        canvas: &mut Canvas<Window>,
+        big: &'a Texture,
+        small: &'a Texture,
+        ttf_context: &'a Sdl2TtfContext,
+    ) -> Drawer<'a> {
         let font = {
             let ttf = Path::new("assets/font/RujisHandwritingFontv.2.0.ttf");
             ttf_context.load_font(&ttf, 20).unwrap()
@@ -76,18 +81,18 @@ impl<'a> Drawer<'a> {
             .create_texture_target(PixelFormatEnum::RGBA8888, fullsize.0, fullsize.1)
             .expect("Could not get texture target for off-screen rendering");
 
-        canvas.with_texture_canvas(&mut texture, |cv| {
-            self.draw_fullsize(cv, level);
-        }).unwrap();
+        canvas
+            .with_texture_canvas(&mut texture, |cv| {
+                self.draw_fullsize(cv, level);
+            })
+            .unwrap();
 
         // Copy onto the screen with appropriate scaling
         let final_rect = self.get_centered_image_rect(self.get_scaled_rendering_size(&level));
 
         canvas.clear();
         let original_rect = Some(Rect::new(0, 0, fullsize.0, fullsize.1));
-        canvas
-            .copy(&texture, original_rect, final_rect)
-            .unwrap();
+        canvas.copy(&texture, original_rect, final_rect).unwrap();
 
         self.draw_status_bar(canvas, &level);
 
@@ -166,7 +171,12 @@ impl<'a> Drawer<'a> {
     }
 
     /// Draws text in the status bar
-    fn draw_status_text(&mut self, canvas: &mut Canvas<Window>, text: &str, location: StatusBarLocation) {
+    fn draw_status_text(
+        &mut self,
+        canvas: &mut Canvas<Window>,
+        text: &str,
+        location: StatusBarLocation,
+    ) {
         let surface = self.font.render(text).blended(self.bar_text_color).unwrap();
         let creator = canvas.texture_creator();
         let texture = creator.create_texture_from_surface(&surface).unwrap();
@@ -317,9 +327,7 @@ macro_rules! decl_tileset {
         }
         impl<'a> $name<'a> {
             pub fn new(texture: &'a Texture) -> Self {
-                $name {
-                    texture: texture,
-                }
+                $name { texture: texture }
             }
         }
         impl<'a> TileSet for $name<'a> {
