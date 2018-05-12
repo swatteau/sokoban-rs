@@ -26,8 +26,6 @@ use game::{Direction, Level, Position};
 
 /// The Drawer struct is responsible for drawing the game onto the screen.
 pub struct Drawer<'a> {
-    /// The underlying SDL renderer
-    renderer: &'a mut Canvas<Window>,
     /// The active tileset
     tileset: TileSetSwitch<'a>,
     /// The font used to display text
@@ -50,7 +48,7 @@ enum StatusBarLocation {
 
 impl<'a> Drawer<'a> {
     /// Creates a new Drawer instance.
-    pub fn new(renderer: &'a mut Canvas<Window>, big: &'a Texture, small: &'a Texture, ttf_context: &'a Sdl2TtfContext) -> Drawer<'a> {
+    pub fn new(renderer: &mut Canvas<Window>, big: &'a Texture, small: &'a Texture, ttf_context: &'a Sdl2TtfContext) -> Drawer<'a> {
         let font = {
             let ttf = Path::new("assets/font/RujisHandwritingFontv.2.0.ttf");
             ttf_context.load_font(&ttf, 20).unwrap()
@@ -58,7 +56,6 @@ impl<'a> Drawer<'a> {
         let screen_size = renderer.window().drawable_size();
         let tileset = TileSetSwitch::new(big, small);
         Drawer {
-            renderer: renderer,
             tileset: tileset,
             font: font,
             screen_size: screen_size,
@@ -69,7 +66,7 @@ impl<'a> Drawer<'a> {
     }
 
     /// Draws a level onto the screen.
-    pub fn draw(&mut self, level: &Level) {
+    pub fn draw(&mut self, renderer: &mut Canvas<Window>, level: &Level) {
         self.tileset.set_extents(level.extents());
 
         // Draw a full-size image onto an off-screen buffer
@@ -80,12 +77,14 @@ impl<'a> Drawer<'a> {
             .expect("Render targets are not supported")
             .create_and_set(PixelFormatEnum::RGBA8888, fullsize.0, fullsize.1);
             */
-        let creator = self.renderer.texture_creator();
-        let texture = creator
+        let creator = renderer.texture_creator();
+        let mut texture = creator
             .create_texture_target(PixelFormatEnum::RGBA8888, fullsize.0, fullsize.1)
             .expect("Could not get texture target for off-screen rendering");
 
-        self.draw_fullsize(level);
+        renderer.with_texture_canvas(&mut texture, |cv| {
+            self.draw_fullsize(cv, level);
+        });
 
         // Copy onto the screen with appropriate scaling
         let final_rect = self.get_centered_image_rect(self.get_scaled_rendering_size(&level));
@@ -98,22 +97,22 @@ impl<'a> Drawer<'a> {
             .unwrap_or_else(|| panic!("Could not get the offscreen texture"));
             */
 
-        self.renderer.clear();
+        renderer.clear();
         let original_rect = Some(Rect::new(0, 0, fullsize.0, fullsize.1));
-        self.renderer
+        renderer
             .copy(&texture, original_rect, final_rect)
             .unwrap();
 
-        self.draw_status_bar(&level);
+        self.draw_status_bar(renderer, &level);
 
-        self.renderer.present();
+        renderer.present();
     }
 
     /// Draws a full-size image of the given level onto the current render target.
-    fn draw_fullsize(&mut self, level: &Level) {
+    fn draw_fullsize(&mut self, renderer: &mut Canvas<Window>, level: &Level) {
         let (cols, rows) = level.extents();
-        self.renderer.set_draw_color(Color::RGB(0, 0, 0));
-        self.renderer.clear();
+        renderer.set_draw_color(Color::RGB(0, 0, 0));
+        renderer.clear();
 
         for r in 0..rows {
             for c in 0..cols {
@@ -122,9 +121,9 @@ impl<'a> Drawer<'a> {
 
                 // First draw the floor tiles
                 if level.is_square(&pos) {
-                    self.draw_tile(Tile::Square, x, y);
+                    self.draw_tile(renderer, Tile::Square, x, y);
                 } else {
-                    self.draw_tile(Tile::Floor, x, y);
+                    self.draw_tile(renderer, Tile::Floor, x, y);
                 }
 
                 // Add the shadows
@@ -140,50 +139,50 @@ impl<'a> Drawer<'a> {
                     ShadowFlags::SW_CORNER,
                 ] {
                     if flags.contains(*f) {
-                        self.draw_tile(Tile::Shadow(*f), x, y);
+                        self.draw_tile(renderer, Tile::Shadow(*f), x, y);
                     }
                 }
 
                 // Draw the other items
                 let z = y - self.tileset.tile_offset();
                 if level.is_wall(&pos) {
-                    self.draw_tile(Tile::Wall, x, z);
+                    self.draw_tile(renderer, Tile::Wall, x, z);
                 }
                 if level.is_box(&pos) {
-                    self.draw_tile(Tile::Rock, x, z);
+                    self.draw_tile(renderer, Tile::Rock, x, z);
                 }
                 if level.is_player(&pos) {
-                    self.draw_tile(Tile::Player, x, z);
+                    self.draw_tile(renderer, Tile::Player, x, z);
                 }
             }
         }
     }
 
     /// Draws the status bar
-    fn draw_status_bar(&mut self, level: &Level) {
-        let prev_color = self.renderer.draw_color();
-        self.renderer.set_draw_color(self.bar_color);
+    fn draw_status_bar(&mut self, renderer: &mut Canvas<Window>, level: &Level) {
+        let prev_color = renderer.draw_color();
+        renderer.set_draw_color(self.bar_color);
         let rect = Rect::new(
             0,
             (self.screen_size.1 - self.bar_height) as i32,
             self.screen_size.0,
             self.bar_height,
         );
-        self.renderer.fill_rect(rect).unwrap();
-        self.renderer.set_draw_color(prev_color);
+        renderer.fill_rect(rect).unwrap();
+        renderer.set_draw_color(prev_color);
 
         // Draw the number of moves
         let s = format!("# moves: {}", level.get_steps());
-        self.draw_status_text(&s, StatusBarLocation::FlushLeft);
+        self.draw_status_text(renderer, &s, StatusBarLocation::FlushLeft);
 
         // Draw the level's title
-        self.draw_status_text(level.title(), StatusBarLocation::FlushRight);
+        self.draw_status_text(renderer, level.title(), StatusBarLocation::FlushRight);
     }
 
     /// Draws text in the status bar
-    fn draw_status_text(&mut self, text: &str, location: StatusBarLocation) {
+    fn draw_status_text(&mut self, renderer: &mut Canvas<Window>, text: &str, location: StatusBarLocation) {
         let surface = self.font.render(text).blended(self.bar_text_color).unwrap();
-        let creator = self.renderer.texture_creator();
+        let creator = renderer.texture_creator();
         let texture = creator.create_texture_from_surface(&surface).unwrap();
         let margin = 4;
         let (w, h) = {
@@ -199,13 +198,13 @@ impl<'a> Drawer<'a> {
                 (self.screen_size.1 - margin - h) as i32,
             ),
         };
-        self.renderer
+        renderer
             .copy(&texture, None, Some(Rect::new(x, y, w, h)))
             .unwrap();
     }
 
     /// Draws a tile at the given coordinates.
-    fn draw_tile(&mut self, tile: Tile, x: i32, y: i32) {
+    fn draw_tile(&mut self, renderer: &mut Canvas<Window>, tile: Tile, x: i32, y: i32) {
         let (col, row) = self.tileset.location(tile).unwrap_or_else(|| {
             panic!("No image for this tile: {:?}", tile);
         });
@@ -216,7 +215,7 @@ impl<'a> Drawer<'a> {
             self.tileset.tile_width(),
             self.tileset.tile_height(),
         ));
-        self.renderer
+        renderer
             .copy(self.tileset.texture(), tile_rect, target_rect)
             .unwrap();
     }

@@ -104,7 +104,7 @@ pub fn main() {
                 }
             }
         }
-        drawer.draw(&level);
+        drawer.draw(&mut canvas, &level);
 
         match event_pump.wait_event() {
             Event::Quit { .. }
