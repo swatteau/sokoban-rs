@@ -52,9 +52,17 @@ pub fn main() {
     let matches = App::from_yaml(yml).get_matches();
 
     let slc_file = matches.value_of("slc_file").unwrap();
+    let mut collection = load_slc_file(Path::new(&slc_file))
+        .unwrap_or_else(|err| panic!("{}", err))
+        .into_iter();
+    let mut reference_level = collection.next().unwrap();
+    let mut level = reference_level.clone();
 
     let sdl_context =
         sdl2::init().unwrap_or_else(|err| panic!("Failed to initialize an SDL context: {}", err));
+
+    let _ = sdl2::image::init(INIT_PNG).unwrap();
+    let ttf_context = sdl2::ttf::init().unwrap();
 
     let window = get_window(&sdl_context, &matches);
 
@@ -63,22 +71,13 @@ pub fn main() {
         .build()
         .unwrap_or_else(|err| panic!("Failed to get an SDL canvas for the main window: {}", err));
 
-    let creator = canvas.texture_creator();
-
-    let _image_context = sdl2::image::init(INIT_PNG).unwrap();
-    let ttf_context = sdl2::ttf::init().unwrap();
+    let texture_creator = canvas.texture_creator();
 
     let mut painter = {
-        let big_set = load_tileset(&creator, "assets/image/tileset.png", 101, 171, 83, 40);
-        let small_set = load_tileset(&creator, "assets/image/tileset-small.png", 50, 85, 41, 20);
+        let big_set = load_tileset(&texture_creator, "assets/image/tileset.png", 101, 171, 83, 40);
+        let small_set = load_tileset(&texture_creator, "assets/image/tileset-small.png", 50, 85, 41, 20);
         Painter::new(&mut canvas, big_set, small_set, &ttf_context)
     };
-
-    let mut collection = load_slc_file(Path::new(&slc_file))
-        .unwrap_or_else(|err| panic!("{}", err))
-        .into_iter();
-    let mut reference_level = collection.next().unwrap();
-    let mut level = reference_level.clone();
 
     let mut running = true;
     let mut event_pump = sdl_context.event_pump().unwrap();
