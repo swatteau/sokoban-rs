@@ -24,14 +24,14 @@ extern crate sdl2_image;
 extern crate sdl2_ttf;
 extern crate xml;
 
-use std::path::Path;
-use std::fs::File;
-use std::io::BufReader;
-use std::str::FromStr;
 use clap::App;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2_image::INIT_PNG;
+use std::fs::File;
+use std::io::BufReader;
+use std::path::Path;
+use std::str::FromStr;
 use xml::reader::EventReader;
 use xml::reader::XmlEvent;
 
@@ -50,14 +50,12 @@ pub fn main() {
     let width = value_t!(matches.value_of("width"), u32).unwrap_or(1024);
     let height = value_t!(matches.value_of("height"), u32).unwrap_or(768);
 
-    let sdl_context = sdl2::init().unwrap_or_else(|err| {
-        panic!("Failed to initialize an SDL context: {}", err)
-    });
+    let sdl_context =
+        sdl2::init().unwrap_or_else(|err| panic!("Failed to initialize an SDL context: {}", err));
 
-    let video_subsystem = sdl_context.video()
-                                     .unwrap_or_else(|err| {
-                                         panic!("Failed to initialize the video subsystem: {}", err)
-                                     });
+    let video_subsystem = sdl_context
+        .video()
+        .unwrap_or_else(|err| panic!("Failed to initialize the video subsystem: {}", err));
 
     let mut window_builder = video_subsystem.window("sokoban-rs", width, height);
     if matches.is_present("fullscreen") {
@@ -66,17 +64,15 @@ pub fn main() {
         window_builder.position_centered();
     }
 
-    let window = window_builder.opengl()
-                               .build()
-                               .unwrap_or_else(|err| {
-                                   panic!("Failed to create the window: {}", err)
-                               });
+    let window = window_builder
+        .opengl()
+        .build()
+        .unwrap_or_else(|err| panic!("Failed to create the window: {}", err));
 
-    let renderer = window.renderer()
-                         .build()
-                         .unwrap_or_else(|err| {
-                             panic!("Failed to get an SDL renderer for the main window: {}", err)
-                         });
+    let renderer = window
+        .renderer()
+        .build()
+        .unwrap_or_else(|err| panic!("Failed to get an SDL renderer for the main window: {}", err));
 
     let _image_context = sdl2_image::init(INIT_PNG).unwrap();
     let ttf_context = sdl2_ttf::init().unwrap();
@@ -84,8 +80,8 @@ pub fn main() {
     let mut drawer = Drawer::new(renderer, &ttf_context);
 
     let mut collection = load_slc_file(Path::new(&slc_file))
-                             .unwrap_or_else(|err| panic!("{}", err))
-                             .into_iter();
+        .unwrap_or_else(|err| panic!("{}", err))
+        .into_iter();
     let mut reference_level = collection.next().unwrap();
     let mut level = reference_level.clone();
 
@@ -108,25 +104,45 @@ pub fn main() {
         drawer.draw(&level);
 
         match event_pump.wait_event() {
-            Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-                running = false
-            }
-            Event::KeyDown { keycode: Some(Keycode::Left), .. } => {
+            Event::Quit { .. }
+            | Event::KeyDown {
+                keycode: Some(Keycode::Escape),
+                ..
+            } => running = false,
+            Event::KeyDown {
+                keycode: Some(Keycode::Left),
+                ..
+            } => {
                 level.step(game::Direction::Left);
             }
-            Event::KeyDown { keycode: Some(Keycode::Right), .. } => {
+            Event::KeyDown {
+                keycode: Some(Keycode::Right),
+                ..
+            } => {
                 level.step(game::Direction::Right);
             }
-            Event::KeyDown { keycode: Some(Keycode::Up), .. } => {
+            Event::KeyDown {
+                keycode: Some(Keycode::Up),
+                ..
+            } => {
                 level.step(game::Direction::Up);
             }
-            Event::KeyDown { keycode: Some(Keycode::Down), .. } => {
+            Event::KeyDown {
+                keycode: Some(Keycode::Down),
+                ..
+            } => {
                 level.step(game::Direction::Down);
             }
-            Event::KeyDown { keycode: Some(Keycode::R), .. } => {
+            Event::KeyDown {
+                keycode: Some(Keycode::R),
+                ..
+            } => {
                 level = reference_level.clone();
             }
-            Event::KeyDown { keycode: Some(Keycode::N), .. } => {
+            Event::KeyDown {
+                keycode: Some(Keycode::N),
+                ..
+            } => {
                 skip = true;
             }
             _ => {}
@@ -146,7 +162,11 @@ fn load_slc_file(path: &Path) -> Result<Vec<Level>, error::SokobanError> {
     let mut reading_level = false;
     for e in parser {
         match e {
-            Ok(XmlEvent::StartElement { ref name, ref attributes, .. }) => {
+            Ok(XmlEvent::StartElement {
+                ref name,
+                ref attributes,
+                ..
+            }) => {
                 if name.local_name == "L" {
                     reading_level = true;
                 } else if name.local_name == "Level" {

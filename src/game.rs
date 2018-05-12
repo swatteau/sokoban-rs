@@ -168,11 +168,13 @@ pub struct InvalidChar(char, Position);
 impl Display for InvalidChar {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let InvalidChar(c, pos) = *self;
-        write!(f,
-               "invalid character `{}' at row {}, column {}",
-               c,
-               pos.row(),
-               pos.column())
+        write!(
+            f,
+            "invalid character `{}' at row {}, column {}",
+            c,
+            pos.row(),
+            pos.column()
+        )
     }
 }
 
@@ -228,7 +230,12 @@ impl FromStr for Level {
 
         // Calculate the extents of the level
         let (mut w, mut h) = (level.player.column(), level.player.row());
-        for pos in level.walls.iter().chain(level.squares.iter()).chain(level.boxes.iter()) {
+        for pos in level
+            .walls
+            .iter()
+            .chain(level.squares.iter())
+            .chain(level.boxes.iter())
+        {
             if pos.column() > w {
                 w = pos.column();
             }

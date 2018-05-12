@@ -13,11 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use super::game;
 use std::convert::From;
 use std::error;
-use std::io;
 use std::fmt::{self, Display, Formatter};
-use super::game;
+use std::io;
 
 /// Represents an application error
 #[derive(Debug)]

@@ -13,16 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::cmp;
-use std::ops::Deref;
-use std::path::Path;
-use sdl2::rect::Rect;
 use sdl2::pixels::{Color, PixelFormatEnum};
+use sdl2::rect::Rect;
 use sdl2::render::{Renderer, Texture};
 use sdl2_image::LoadTexture;
 use sdl2_ttf::{Font, Sdl2TtfContext};
+use std::cmp;
+use std::ops::Deref;
+use std::path::Path;
 
-use game::{Level, Position, Direction};
+use game::{Direction, Level, Position};
 
 /// The Drawer struct is responsible for drawing the game onto the screen.
 pub struct Drawer<'a> {
@@ -75,26 +75,26 @@ impl<'a> Drawer<'a> {
         // Draw a full-size image onto an off-screen buffer
         let fullsize = self.tileset.get_rendering_size(level.extents());
         let _ = self.renderer
-                    .render_target()
-                    .expect("Render targets are not supported")
-                    .create_and_set(PixelFormatEnum::RGBA8888, fullsize.0, fullsize.1);
+            .render_target()
+            .expect("Render targets are not supported")
+            .create_and_set(PixelFormatEnum::RGBA8888, fullsize.0, fullsize.1);
 
         self.draw_fullsize(level);
 
         // Copy onto the screen with appropriate scaling
         let final_rect = self.get_centered_image_rect(self.get_scaled_rendering_size(&level));
         let texture = self.renderer
-                          .render_target()
-                          .unwrap()
-                          .reset()
-                          .unwrap_or_else(|err| {
-                              panic!("Could not reset to the default render target: {}", err)
-                          })
-                          .unwrap_or_else(|| panic!("Could not get the offscreen texture"));
+            .render_target()
+            .unwrap()
+            .reset()
+            .unwrap_or_else(|err| panic!("Could not reset to the default render target: {}", err))
+            .unwrap_or_else(|| panic!("Could not get the offscreen texture"));
 
         self.renderer.clear();
         let original_rect = Some(Rect::new(0, 0, fullsize.0, fullsize.1));
-        self.renderer.copy(&texture, original_rect, final_rect).unwrap();
+        self.renderer
+            .copy(&texture, original_rect, final_rect)
+            .unwrap();
 
         self.draw_status_bar(&level);
 
@@ -121,8 +121,16 @@ impl<'a> Drawer<'a> {
 
                 // Add the shadows
                 let flags = get_shadow_flags(&level, &pos);
-                for f in &[ShadowFlags::N_EDGE, ShadowFlags::S_EDGE, ShadowFlags::E_EDGE, ShadowFlags::W_EDGE, ShadowFlags::NE_CORNER, ShadowFlags::NW_CORNER, ShadowFlags::SE_CORNER,
-                           ShadowFlags::SW_CORNER] {
+                for f in &[
+                    ShadowFlags::N_EDGE,
+                    ShadowFlags::S_EDGE,
+                    ShadowFlags::E_EDGE,
+                    ShadowFlags::W_EDGE,
+                    ShadowFlags::NE_CORNER,
+                    ShadowFlags::NW_CORNER,
+                    ShadowFlags::SE_CORNER,
+                    ShadowFlags::SW_CORNER,
+                ] {
                     if flags.contains(*f) {
                         self.draw_tile(Tile::Shadow(*f), x, y);
                     }
@@ -147,10 +155,12 @@ impl<'a> Drawer<'a> {
     fn draw_status_bar(&mut self, level: &Level) {
         let prev_color = self.renderer.draw_color();
         self.renderer.set_draw_color(self.bar_color);
-        let rect = Rect::new(0,
-                             (self.screen_size.1 - self.bar_height) as i32,
-                             self.screen_size.0,
-                             self.bar_height);
+        let rect = Rect::new(
+            0,
+            (self.screen_size.1 - self.bar_height) as i32,
+            self.screen_size.0,
+            self.bar_height,
+        );
         self.renderer.fill_rect(rect).unwrap();
         self.renderer.set_draw_color(prev_color);
 
@@ -175,12 +185,14 @@ impl<'a> Drawer<'a> {
             StatusBarLocation::FlushLeft => {
                 (margin as i32, (self.screen_size.1 - margin - h) as i32)
             }
-            StatusBarLocation::FlushRight => {
-                ((self.screen_size.0 - margin - w) as i32,
-                 (self.screen_size.1 - margin - h) as i32)
-            }
+            StatusBarLocation::FlushRight => (
+                (self.screen_size.0 - margin - w) as i32,
+                (self.screen_size.1 - margin - h) as i32,
+            ),
         };
-        self.renderer.copy(&texture, None, Some(Rect::new(x, y, w, h))).unwrap();
+        self.renderer
+            .copy(&texture, None, Some(Rect::new(x, y, w, h)))
+            .unwrap();
     }
 
     /// Draws a tile at the given coordinates.
@@ -189,11 +201,15 @@ impl<'a> Drawer<'a> {
             panic!("No image for this tile: {:?}", tile);
         });
         let tile_rect = self.tileset.get_tile_rect(col, row);
-        let target_rect = Some(Rect::new(x,
-                                         y,
-                                         self.tileset.tile_width(),
-                                         self.tileset.tile_height()));
-        self.renderer.copy(self.tileset.texture(), tile_rect, target_rect).unwrap();
+        let target_rect = Some(Rect::new(
+            x,
+            y,
+            self.tileset.tile_width(),
+            self.tileset.tile_height(),
+        ));
+        self.renderer
+            .copy(self.tileset.texture(), tile_rect, target_rect)
+            .unwrap();
     }
 
     /// Returns the size of the drawing scaled to fit onto the screen.
@@ -297,19 +313,18 @@ trait TileSet {
         let y = (row * h) as i32;
         Some(Rect::new(x, y, w, h))
     }
-
 }
 
 // A macro to generate the tilesets
 macro_rules! decl_tileset {
-    ($name:ident, $path:expr, $width:expr, $height:expr, $effective_height:expr, $offset:expr) => (
+    ($name:ident, $path:expr, $width:expr, $height:expr, $effective_height:expr, $offset:expr) => {
         struct $name {
-            texture: Texture
+            texture: Texture,
         }
         impl $name {
             pub fn new(renderer: &Renderer) -> Self {
                 $name {
-                    texture: renderer.load_texture(Path::new($path)).unwrap()
+                    texture: renderer.load_texture(Path::new($path)).unwrap(),
                 }
             }
         }
@@ -330,11 +345,18 @@ macro_rules! decl_tileset {
                 $offset
             }
         }
-    )
+    };
 }
 
 decl_tileset!(BigTileSet, "assets/image/tileset.png", 101, 171, 83, 40);
-decl_tileset!(SmallTileSet, "assets/image/tileset-small.png", 50, 85, 41, 20);
+decl_tileset!(
+    SmallTileSet,
+    "assets/image/tileset-small.png",
+    50,
+    85,
+    41,
+    20
+);
 
 /// Enables switching between two tilesets.
 struct TileSetSwitch {
@@ -420,16 +442,24 @@ fn get_shadow_flags(level: &Level, pos: &Position) -> ShadowFlags {
     if level.is_wall(&east) {
         flags = flags | ShadowFlags::E_EDGE;
     }
-    if level.is_wall(&north.neighbor(Direction::Right)) && !flags.intersects(ShadowFlags::N_EDGE | ShadowFlags::E_EDGE) {
+    if level.is_wall(&north.neighbor(Direction::Right))
+        && !flags.intersects(ShadowFlags::N_EDGE | ShadowFlags::E_EDGE)
+    {
         flags = flags | ShadowFlags::NE_CORNER;
     }
-    if level.is_wall(&north.neighbor(Direction::Left)) && !flags.intersects(ShadowFlags::N_EDGE | ShadowFlags::W_EDGE) {
+    if level.is_wall(&north.neighbor(Direction::Left))
+        && !flags.intersects(ShadowFlags::N_EDGE | ShadowFlags::W_EDGE)
+    {
         flags = flags | ShadowFlags::NW_CORNER;
     }
-    if level.is_wall(&south.neighbor(Direction::Right)) && !flags.intersects(ShadowFlags::S_EDGE | ShadowFlags::E_EDGE) {
+    if level.is_wall(&south.neighbor(Direction::Right))
+        && !flags.intersects(ShadowFlags::S_EDGE | ShadowFlags::E_EDGE)
+    {
         flags = flags | ShadowFlags::SE_CORNER;
     }
-    if level.is_wall(&south.neighbor(Direction::Left)) && !flags.intersects(ShadowFlags::S_EDGE | ShadowFlags::W_EDGE) {
+    if level.is_wall(&south.neighbor(Direction::Left))
+        && !flags.intersects(ShadowFlags::S_EDGE | ShadowFlags::W_EDGE)
+    {
         flags = flags | ShadowFlags::SW_CORNER;
     }
     flags
