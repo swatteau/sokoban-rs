@@ -57,8 +57,12 @@ impl<'a> Drawer<'a> {
             let ttf = Path::new("assets/font/RujisHandwritingFontv.2.0.ttf");
             ttf_context.load_font(&ttf, 20).unwrap()
         };
+
+        let big_tileset = Tileset::new(big, 101, 171, 83, 40);
+        let small_tileset = Tileset::new(small, 50, 85, 41, 20);
+
         let screen_size = canvas.window().drawable_size();
-        let selector = TilesetSelector::new(big, small);
+        let selector = TilesetSelector::new(big_tileset, small_tileset);
         Drawer {
             selector: selector,
             font: font,
@@ -235,7 +239,7 @@ impl<'a> Drawer<'a> {
         Some(Rect::new(x, y, img_size.0, img_size.1))
     }
 
-    fn tileset(&self) -> &TileSet {
+    fn tileset(&self) -> &Tileset {
         self.selector.select()
     }
 }
@@ -257,22 +261,49 @@ enum Tile {
     Shadow(ShadowFlags),
 }
 
-/// Holds information about a tileset.
-trait TileSet {
+struct Tileset<'a> {
+    texture: &'a Texture<'a>,
+    width: u32,
+    height: u32,
+    effective_height: u32,
+    offset: i32,
+}
+
+impl<'a> Tileset<'a> {
+    pub fn new(texture: &'a Texture, width: u32, height: u32, effective_height: u32, offset: i32) -> Tileset<'a> {
+        Tileset { 
+            texture: texture,
+            width: width,
+            height: height,
+            effective_height: effective_height,
+            offset: offset,
+        }
+    }
+
     /// Returns the associated texture
-    fn texture(&self) -> &Texture;
+    fn texture(&self) -> &Texture {
+        &self.texture
+    }
 
     /// Returns the width of a tile.
-    fn tile_width(&self) -> u32;
+    fn tile_width(&self) -> u32 {
+        self.width
+    }
 
     /// Returns the height of a tile.
-    fn tile_height(&self) -> u32;
+    fn tile_height(&self) -> u32 {
+        self.height
+    }
 
     /// Returns the effective height of a tile (used for stacking)
-    fn tile_effective_height(&self) -> u32;
+    fn tile_effective_height(&self) -> u32 {
+        self.effective_height
+    }
 
     /// Returns the offset need to draw items on the floor.
-    fn tile_offset(&self) -> i32;
+    fn tile_offset(&self) -> i32 {
+        self.offset
+    }
 
     /// Returns the location of the tile in the tileset texture.
     fn location(&self, tile: Tile) -> Option<(u32, u32)> {
@@ -322,55 +353,14 @@ trait TileSet {
     }
 }
 
-// A macro to generate the tilesets
-macro_rules! decl_tileset {
-    ($name:ident, $path:expr, $width:expr, $height:expr, $effective_height:expr, $offset:expr) => {
-        struct $name<'a> {
-            texture: &'a Texture<'a>,
-        }
-        impl<'a> $name<'a> {
-            pub fn new(texture: &'a Texture) -> Self {
-                $name { texture: texture }
-            }
-        }
-        impl<'a> TileSet for $name<'a> {
-            fn texture(&self) -> &Texture {
-                &self.texture
-            }
-            fn tile_width(&self) -> u32 {
-                $width
-            }
-            fn tile_height(&self) -> u32 {
-                $height
-            }
-            fn tile_effective_height(&self) -> u32 {
-                $effective_height
-            }
-            fn tile_offset(&self) -> i32 {
-                $offset
-            }
-        }
-    };
-}
-
-decl_tileset!(BigTileSet, "assets/image/tileset.png", 101, 171, 83, 40);
-decl_tileset!(
-    SmallTileSet,
-    "assets/image/tileset-small.png",
-    50,
-    85,
-    41,
-    20
-);
-
 /// Enables selecting between two tilesets.
 struct TilesetSelector<'a> {
     /// The extents of the current level
     extents: (i32, i32),
     /// The small tileset
-    tileset_small: SmallTileSet<'a>,
+    tileset_small: Tileset<'a>,
     /// The big tileset
-    tileset_big: BigTileSet<'a>,
+    tileset_big: Tileset<'a>,
 }
 
 impl<'a> TilesetSelector<'a> {
@@ -378,11 +368,11 @@ impl<'a> TilesetSelector<'a> {
     const THRESHOLD: i32 = 40;
 
     /// Creates a new instance.
-    pub fn new(big: &'a Texture, small: &'a Texture) -> Self {
+    pub fn new(big: Tileset<'a>, small: Tileset<'a>) -> Self {
         TilesetSelector {
             extents: (0, 0),
-            tileset_big: BigTileSet::new(big),
-            tileset_small: SmallTileSet::new(small),
+            tileset_big: big,
+            tileset_small: small,
         }
     }
 
@@ -391,7 +381,7 @@ impl<'a> TilesetSelector<'a> {
         self.extents = extents;
     }
 
-    pub fn select(&self) -> &TileSet {
+    pub fn select(&self) -> &Tileset {
         if cmp::max(self.extents.0, self.extents.1) > TilesetSelector::THRESHOLD {
             &self.tileset_small
         } else {
