@@ -71,8 +71,8 @@ impl<'a> Painter<'a> {
         }
     }
 
-    /// Draws a level onto the screen.
-    pub fn draw(&mut self, canvas: &mut Canvas<Window>, level: &Level) {
+    /// Paints a level onto the screen.
+    pub fn paint(&mut self, canvas: &mut Canvas<Window>, level: &Level) {
         self.selector.reset(level.extents());
 
         // Draw a full-size image onto an off-screen buffer
@@ -84,7 +84,7 @@ impl<'a> Painter<'a> {
 
         canvas
             .with_texture_canvas(&mut texture, |cv| {
-                self.draw_fullsize(cv, level);
+                self.paint_fullsize(cv, level);
             })
             .unwrap();
 
@@ -95,13 +95,13 @@ impl<'a> Painter<'a> {
         let original_rect = Some(Rect::new(0, 0, fullsize.0, fullsize.1));
         canvas.copy(&texture, original_rect, final_rect).unwrap();
 
-        self.draw_status_bar(canvas, &level);
+        self.paint_status_bar(canvas, &level);
 
         canvas.present();
     }
 
-    /// Draws a full-size image of the given level onto the current render target.
-    fn draw_fullsize(&mut self, canvas: &mut Canvas<Window>, level: &Level) {
+    /// Paints a full-size image of the given level onto the current render target.
+    fn paint_fullsize(&mut self, canvas: &mut Canvas<Window>, level: &Level) {
         let (cols, rows) = level.extents();
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
@@ -111,11 +111,11 @@ impl<'a> Painter<'a> {
                 let pos = Position::new(r, c);
                 let (x, y) = self.tileset().get_coordinates(&pos);
 
-                // First draw the floor tiles
+                // First paint the floor tiles
                 if level.is_square(&pos) {
-                    self.draw_tile(canvas, Tile::Square, x, y);
+                    self.paint_tile(canvas, Tile::Square, x, y);
                 } else {
-                    self.draw_tile(canvas, Tile::Floor, x, y);
+                    self.paint_tile(canvas, Tile::Floor, x, y);
                 }
 
                 // Add the shadows
@@ -131,27 +131,27 @@ impl<'a> Painter<'a> {
                     ShadowFlags::SW_CORNER,
                 ] {
                     if flags.contains(*f) {
-                        self.draw_tile(canvas, Tile::Shadow(*f), x, y);
+                        self.paint_tile(canvas, Tile::Shadow(*f), x, y);
                     }
                 }
 
                 // Draw the other items
                 let z = y - self.tileset().offset();
                 if level.is_wall(&pos) {
-                    self.draw_tile(canvas, Tile::Wall, x, z);
+                    self.paint_tile(canvas, Tile::Wall, x, z);
                 }
                 if level.is_box(&pos) {
-                    self.draw_tile(canvas, Tile::Rock, x, z);
+                    self.paint_tile(canvas, Tile::Rock, x, z);
                 }
                 if level.is_player(&pos) {
-                    self.draw_tile(canvas, Tile::Player, x, z);
+                    self.paint_tile(canvas, Tile::Player, x, z);
                 }
             }
         }
     }
 
-    /// Draws the status bar
-    fn draw_status_bar(&mut self, canvas: &mut Canvas<Window>, level: &Level) {
+    /// Paints the status bar
+    fn paint_status_bar(&mut self, canvas: &mut Canvas<Window>, level: &Level) {
         let prev_color = canvas.draw_color();
         canvas.set_draw_color(self.bar_color);
         let rect = Rect::new(
@@ -163,16 +163,16 @@ impl<'a> Painter<'a> {
         canvas.fill_rect(rect).unwrap();
         canvas.set_draw_color(prev_color);
 
-        // Draw the number of moves
+        // Paints the number of moves
         let s = format!("# moves: {}", level.get_steps());
-        self.draw_status_text(canvas, &s, StatusBarLocation::FlushLeft);
+        self.paint_status_text(canvas, &s, StatusBarLocation::FlushLeft);
 
-        // Draw the level's title
-        self.draw_status_text(canvas, level.title(), StatusBarLocation::FlushRight);
+        // Paints the level's title
+        self.paint_status_text(canvas, level.title(), StatusBarLocation::FlushRight);
     }
 
-    /// Draws text in the status bar
-    fn draw_status_text(
+    /// Paints text in the status bar
+    fn paint_status_text(
         &mut self,
         canvas: &mut Canvas<Window>,
         text: &str,
@@ -200,8 +200,8 @@ impl<'a> Painter<'a> {
             .unwrap();
     }
 
-    /// Draws a tile at the given coordinates.
-    fn draw_tile(&mut self, canvas: &mut Canvas<Window>, tile: Tile, x: i32, y: i32) {
+    /// Paints a tile at the given coordinates.
+    fn paint_tile(&mut self, canvas: &mut Canvas<Window>, tile: Tile, x: i32, y: i32) {
         let (col, row) = self.tileset().location(tile).unwrap_or_else(|| {
             panic!("No image for this tile: {:?}", tile);
         });

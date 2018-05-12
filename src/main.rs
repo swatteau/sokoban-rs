@@ -111,7 +111,7 @@ pub fn main() {
                 }
             }
         }
-        painter.draw(&mut canvas, &level);
+        painter.paint(&mut canvas, &level);
 
         match event_pump.wait_event() {
             Event::Quit { .. }
