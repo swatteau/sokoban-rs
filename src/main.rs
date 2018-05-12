@@ -52,8 +52,7 @@ pub fn main() {
     let matches = App::from_yaml(yml).get_matches();
 
     let slc_file = matches.value_of("slc_file").unwrap();
-    let mut collection =
-        load_slc_file(Path::new(&slc_file)).unwrap_or_else(|err| panic!("{}", err));
+    let collection = load_slc_file(Path::new(&slc_file)).unwrap_or_else(|err| panic!("{}", err));
 
     let sdl_context =
         sdl2::init().unwrap_or_else(|err| panic!("Failed to initialize an SDL context: {}", err));
@@ -70,7 +69,7 @@ pub fn main() {
 
     let texture_creator = canvas.texture_creator();
 
-    let mut painter = {
+    let painter = {
         let big_set = load_tileset(
             &texture_creator,
             "assets/image/tileset.png",
