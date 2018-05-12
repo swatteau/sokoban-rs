@@ -27,7 +27,7 @@ use sdl2::event::Event;
 use sdl2::image::LoadTexture;
 use sdl2::image::INIT_PNG;
 use sdl2::keyboard::Keycode;
-use sdl2::render::TextureCreator;
+use sdl2::render::{Canvas, TextureCreator};
 use sdl2::video::{Window, WindowContext};
 use sdl2::Sdl;
 use std::fs::File;
@@ -53,10 +53,7 @@ pub fn main() {
 
     let slc_file = matches.value_of("slc_file").unwrap();
     let mut collection = load_slc_file(Path::new(&slc_file))
-        .unwrap_or_else(|err| panic!("{}", err))
-        .into_iter();
-    let mut reference_level = collection.next().unwrap();
-    let mut level = reference_level.clone();
+        .unwrap_or_else(|err| panic!("{}", err));
 
     let sdl_context =
         sdl2::init().unwrap_or_else(|err| panic!("Failed to initialize an SDL context: {}", err));
@@ -79,6 +76,14 @@ pub fn main() {
         Painter::new(&mut canvas, big_set, small_set, &ttf_context)
     };
 
+    mainloop(&sdl_context, &collection, painter, &mut canvas);
+}
+
+fn mainloop(sdl_context: &Sdl, levels: &[Level], mut painter: Painter, canvas: &mut Canvas<Window>) {
+    let mut collection = levels.into_iter();
+    let mut reference_level = collection.next().unwrap();
+    let mut level = reference_level.clone();
+
     let mut running = true;
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut skip = false;
@@ -86,8 +91,8 @@ pub fn main() {
         if level.is_completed() || skip {
             match collection.next() {
                 Some(l) => {
-                    level = l;
-                    reference_level = level.clone();
+                    level = l.clone();
+                    reference_level = l;
                     skip = false;
                 }
                 None => {
@@ -95,7 +100,7 @@ pub fn main() {
                 }
             }
         }
-        painter.paint(&mut canvas, &level);
+        painter.paint(canvas, &level);
 
         match event_pump.wait_event() {
             Event::Quit { .. }
