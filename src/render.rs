@@ -31,7 +31,7 @@ pub struct Drawer<'a> {
     /// The active tileset
     tileset: TileSetSwitch,
     /// The font used to display text
-    font: Font,
+    font: Font<'a>,
     /// The size of the screen in pixels
     screen_size: (u32, u32),
     /// The height of the status bar
@@ -50,7 +50,7 @@ enum StatusBarLocation {
 
 impl<'a> Drawer<'a> {
     /// Creates a new Drawer instance.
-    pub fn new(renderer: Renderer<'a>, ttf_context: &Sdl2TtfContext) -> Drawer<'a> {
+    pub fn new(renderer: Renderer<'a>, ttf_context: &'a Sdl2TtfContext) -> Drawer<'a> {
         let font = {
             let ttf = Path::new("assets/font/RujisHandwritingFontv.2.0.ttf");
             ttf_context.load_font(&ttf, 20).unwrap()
