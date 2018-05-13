@@ -1,5 +1,5 @@
 name: sokoban-rs
-version: 1.2.0
+version: 1.2.1
 about: An implementation of Sokoban in the Rust programming language.
 author: Sébastien Watteau
 
