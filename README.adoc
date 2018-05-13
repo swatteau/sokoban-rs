@@ -11,7 +11,7 @@ This is an implementation of Sokoban in the https://www.rust-lang.org[Rust Progr
 .An example level:
 image:assets/image/screenshot.png["Screenshot",width=480,link="assets/image/screenshot.png"]
 
-== Build instructions
+== Build Instructions
 
 Before building sokoban-rs, you will need to install the developpement libraries for https://www.libsdl.org[SDL2], preferably with the package manager that comes
 with your operating system.
@@ -42,18 +42,28 @@ cd sokoban-rs
 cargo build --release
 ----
 
-== How to play
+== How to Play
 
 This game is released without any level. You can download level collections from http://www.sourcecode.se/sokoban/levels in the SLC (XML) format. For a quick start, try this:
 
 ----
 wget http://www.sourcecode.se/sokoban/download/microban.slc
-./target/release/sokoban-rs /path/to/microban.slc
+cargo run --release -- microban.slc
 ----
 
 * Use the arrow keys to move the player.
 * Type R to retry the current level.
 * Type N to skip the current level.
+
+== Graphics Options
+
+By default, the game will start in 1024x768 windowed mode.
+You can modify the width and height of the window as well as switch to fullscreen mode.
+
+.Example:
+----
+cargo run --release -- microban.slc --width=1920 --height=1080 --fullscreen
+----
 
 == Credits
 
