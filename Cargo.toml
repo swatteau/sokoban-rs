@@ -4,7 +4,7 @@ version = "1.2.1"
 authors = ["Sébastien Watteau"]
 description = "An implementation of Sokoban in Rust"
 repository = "https://github.com/swatteau/sokoban-rs"
-readme = "README.adoc"
+readme = "README.md"
 keywords = ["game", "sokoban"]
 license = "Apache-2.0"
 
