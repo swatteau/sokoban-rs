@@ -53,11 +53,11 @@ impl<'a> Tileset<'a> {
         offset: i32,
     ) -> Tileset<'a> {
         Tileset {
-            texture: texture,
-            width: width,
-            height: height,
-            effective_height: effective_height,
-            offset: offset,
+            texture,
+            width,
+            height,
+            effective_height,
+            offset,
         }
     }
 
@@ -151,8 +151,8 @@ impl<'a> TilesetSelector<'a> {
     pub fn new(big_set: Tileset<'a>, small_set: Tileset<'a>) -> Self {
         TilesetSelector {
             extents: (0, 0),
-            big_set: big_set,
-            small_set: small_set,
+            big_set,
+            small_set,
         }
     }
 

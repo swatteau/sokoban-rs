@@ -40,6 +40,7 @@ pub struct Painter<'a> {
 }
 
 /// Represents a location for text in the status bar
+#[derive(Clone, Copy)]
 enum StatusBarLocation {
     FlushLeft,
     FlushRight,
@@ -56,9 +57,9 @@ impl<'a> Painter<'a> {
         let screen_size = canvas.window().drawable_size();
         let selector = TilesetSelector::new(big_set, small_set);
         Painter {
-            selector: selector,
-            font: font,
-            screen_size: screen_size,
+            selector,
+            font,
+            screen_size,
             bar_height: 32,
             bar_color: Color::RGBA(20, 20, 20, 255),
             bar_text_color: Color::RGBA(255, 192, 0, 255),
@@ -214,12 +215,12 @@ impl<'a> Painter<'a> {
     /// Returns the size of the drawing scaled to fit onto the screen.
     fn get_scaled_rendering_size(&self, level: &Level) -> (u32, u32) {
         let render_size = self.tileset().get_rendering_size(level.extents());
-        let width_ratio = (self.screen_size.0 as f64) / (render_size.0 as f64);
+        let width_ratio = f64::from(self.screen_size.0) / f64::from(render_size.0);
         let h = self.screen_size.1 - self.bar_height;
-        let height_ratio = (h as f64) / (render_size.1 as f64);
+        let height_ratio = f64::from(h) / f64::from(render_size.1);
         let ratio = f64::min(1.0, f64::min(width_ratio, height_ratio));
 
-        let scale = |sz: u32| (ratio * (sz as f64)).floor() as u32;
+        let scale = |sz: u32| (ratio * f64::from(sz)).floor() as u32;
 
         (scale(render_size.0), scale(render_size.1))
     }
@@ -245,36 +246,36 @@ fn get_shadow_flags(level: &Level, pos: &Position) -> ShadowFlags {
 
     let mut flags = ShadowFlags::empty();
     if level.is_wall(&north) {
-        flags = flags | ShadowFlags::N_EDGE;
+        flags |= ShadowFlags::N_EDGE;
     }
     if level.is_wall(&south) {
-        flags = flags | ShadowFlags::S_EDGE;
+        flags |= ShadowFlags::S_EDGE;
     }
     if level.is_wall(&west) {
-        flags = flags | ShadowFlags::W_EDGE;
+        flags |= ShadowFlags::W_EDGE;
     }
     if level.is_wall(&east) {
-        flags = flags | ShadowFlags::E_EDGE;
+        flags |= ShadowFlags::E_EDGE;
     }
     if level.is_wall(&north.neighbor(Direction::Right))
         && !flags.intersects(ShadowFlags::N_EDGE | ShadowFlags::E_EDGE)
     {
-        flags = flags | ShadowFlags::NE_CORNER;
+        flags |= ShadowFlags::NE_CORNER;
     }
     if level.is_wall(&north.neighbor(Direction::Left))
         && !flags.intersects(ShadowFlags::N_EDGE | ShadowFlags::W_EDGE)
     {
-        flags = flags | ShadowFlags::NW_CORNER;
+        flags |= ShadowFlags::NW_CORNER;
     }
     if level.is_wall(&south.neighbor(Direction::Right))
         && !flags.intersects(ShadowFlags::S_EDGE | ShadowFlags::E_EDGE)
     {
-        flags = flags | ShadowFlags::SE_CORNER;
+        flags |= ShadowFlags::SE_CORNER;
     }
     if level.is_wall(&south.neighbor(Direction::Left))
         && !flags.intersects(ShadowFlags::S_EDGE | ShadowFlags::W_EDGE)
     {
-        flags = flags | ShadowFlags::SW_CORNER;
+        flags |= ShadowFlags::SW_CORNER;
     }
     flags
 }
