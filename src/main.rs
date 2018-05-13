@@ -22,7 +22,7 @@ extern crate clap;
 extern crate sdl2;
 extern crate xml;
 
-use clap::{App, ArgMatches};
+use clap::App;
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
 use sdl2::image::INIT_PNG;
@@ -47,20 +47,23 @@ use game::Level;
 use painter::Painter;
 use tileset::Tileset;
 
-pub fn main() {
+pub fn main() -> Result<(), Box<std::error::Error>> {
+    // Read command line arguments
     let yml = load_yaml!("clap.yml");
     let matches = App::from_yaml(yml).get_matches();
-
+    let width = value_t!(matches.value_of("width"), u32).unwrap_or(1024);
+    let height = value_t!(matches.value_of("height"), u32).unwrap_or(768);
+    let fullscreen = matches.is_present("fullscreen");
     let slc_file = matches.value_of("slc_file").unwrap();
-    let collection = load_slc_file(Path::new(&slc_file)).unwrap_or_else(|err| panic!("{}", err));
 
-    let sdl_context =
-        sdl2::init().unwrap_or_else(|err| panic!("Failed to initialize an SDL context: {}", err));
+    let collection = load_slc_file(slc_file)?;
+
+    let sdl_context = sdl2::init()?;
 
     let _ = sdl2::image::init(INIT_PNG).unwrap();
     let ttf_context = sdl2::ttf::init().unwrap();
 
-    let window = get_window(&sdl_context, &matches);
+    let window = get_window(&sdl_context, width, height, fullscreen);
 
     let mut canvas = window
         .into_canvas()
@@ -90,6 +93,8 @@ pub fn main() {
     };
 
     mainloop(&sdl_context, &collection, painter, &mut canvas);
+
+    Ok(())
 }
 
 fn mainloop(
@@ -167,16 +172,14 @@ fn mainloop(
     }
 }
 
-fn get_window(sdl_context: &Sdl, matches: &ArgMatches) -> Window {
-    let width = value_t!(matches.value_of("width"), u32).unwrap_or(1024);
-    let height = value_t!(matches.value_of("height"), u32).unwrap_or(768);
+fn get_window(sdl_context: &Sdl, width: u32, height: u32, fullscreen: bool) -> Window {
 
     let video_subsystem = sdl_context
         .video()
         .unwrap_or_else(|err| panic!("Failed to initialize the video subsystem: {}", err));
 
     let mut window_builder = video_subsystem.window("sokoban-rs", width, height);
-    if matches.is_present("fullscreen") {
+    if fullscreen {
         window_builder.fullscreen();
     } else {
         window_builder.position_centered();
@@ -203,9 +206,9 @@ fn load_tileset<P: AsRef<Path>>(
 }
 
 /// Builds levels from a level collection file in the SLC format.
-fn load_slc_file(path: &Path) -> Result<Vec<Level>, error::SokobanError> {
+fn load_slc_file<P: AsRef<Path>>(path: P) -> Result<Vec<Level>, error::SokobanError> {
     let mut collection = Vec::new();
-    let file = try!(File::open(&path));
+    let file = try!(File::open(path.as_ref()));
     let reader = BufReader::new(file);
     let parser = EventReader::new(reader);
 
