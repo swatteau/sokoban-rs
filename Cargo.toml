@@ -1,6 +1,6 @@
 [package]
 name = "sokoban-rs"
-version = "1.1.0"
+version = "1.2.0"
 authors = ["Sébastien Watteau"]
 description = "An implementation of Sokoban in Rust"
 repository = "https://github.com/swatteau/sokoban-rs"
