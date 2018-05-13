@@ -89,7 +89,7 @@ pub fn main() -> Result<(), Box<Error>> {
         Painter::new(&mut canvas, big_set, small_set, &ttf_context)
     };
 
-    mainloop(&sdl, &levels, &mut painter, &mut canvas);
+    mainloop(&sdl, levels.iter(), &mut painter, &mut canvas);
 
     Ok(())
 }
@@ -143,7 +143,12 @@ fn load_slc_file<P: AsRef<Path>>(path: P) -> Result<Vec<Level>, error::SokobanEr
 }
 
 /// Creates the SDL window
-fn create_window(sdl: &Sdl, width: u32, height: u32, fullscreen: bool) -> Result<Window, Box<Error>> {
+fn create_window(
+    sdl: &Sdl,
+    width: u32,
+    height: u32,
+    fullscreen: bool,
+) -> Result<Window, Box<Error>> {
     let mut window_builder = sdl.video()?.window("sokoban-rs", width, height);
     if fullscreen {
         window_builder.fullscreen();
@@ -169,25 +174,28 @@ fn load_tileset<P: AsRef<Path>>(
 }
 
 /// Main game event loop
-fn mainloop(
+fn mainloop<'a, I: Iterator<Item = &'a Level>>(
     sdl: &Sdl,
-    levels: &[Level],
+    mut levels: I,
     painter: &mut Painter,
     canvas: &mut Canvas<Window>,
 ) {
-    let mut collection = levels.into_iter();
-    let mut reference_level = collection.next().unwrap();
-    let mut level = reference_level.clone();
+    let (mut reference_level, mut level) = match levels.next() {
+        Some(l) => (l, l.clone()),
+        None => {
+            return;
+        }
+    };
 
     let mut running = true;
-    let mut event_pump = sdl.event_pump().unwrap();
+    let mut events = sdl.event_pump().unwrap();
     let mut skip = false;
     while running {
         if level.is_completed() || skip {
-            match collection.next() {
+            match levels.next() {
                 Some(l) => {
-                    level = l.clone();
                     reference_level = l;
+                    level = l.clone();
                     skip = false;
                 }
                 None => {
@@ -195,9 +203,10 @@ fn mainloop(
                 }
             }
         }
+
         painter.paint(canvas, &level);
 
-        match event_pump.wait_event() {
+        match events.wait_event() {
             Event::Quit { .. }
             | Event::KeyDown {
                 keycode: Some(Keycode::Escape),
