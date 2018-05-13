@@ -16,9 +16,8 @@
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::rect::Rect;
 use sdl2::render::Canvas;
-use sdl2::ttf::{Font, Sdl2TtfContext};
+use sdl2::ttf::Font;
 use sdl2::video::Window;
-use std::path::Path;
 
 use game::{Direction, Level, Position};
 use shadow::ShadowFlags;
@@ -52,13 +51,8 @@ impl<'a> Painter<'a> {
         canvas: &mut Canvas<Window>,
         big_set: Tileset<'a>,
         small_set: Tileset<'a>,
-        ttf_context: &'a Sdl2TtfContext,
+        font: Font<'a, 'a>,
     ) -> Painter<'a> {
-        let font = {
-            let ttf = Path::new("assets/font/RujisHandwritingFontv.2.0.ttf");
-            ttf_context.load_font(&ttf, 20).unwrap()
-        };
-
         let screen_size = canvas.window().drawable_size();
         let selector = TilesetSelector::new(big_set, small_set);
         Painter {

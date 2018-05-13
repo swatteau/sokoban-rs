@@ -86,7 +86,8 @@ pub fn main() -> Result<(), Box<Error>> {
             41,
             20,
         )?;
-        Painter::new(&mut canvas, big_set, small_set, &ttf_context)
+        let font = ttf_context.load_font("assets/font/RujisHandwritingFontv.2.0.ttf", 20)?;
+        Painter::new(&mut canvas, big_set, small_set, font)
     };
 
     mainloop(&sdl, levels.iter(), &mut painter, &mut canvas);
