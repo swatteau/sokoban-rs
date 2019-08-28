@@ -1,7 +1,7 @@
 # sokoban-rs
 
 [![Build Status](https://travis-ci.org/swatteau/sokoban-rs.svg)](https://travis-ci.org/swatteau/sokoban-rs)
-[![crates.io](https://img.shields.io/badge/crates.io-v1.2.1-brightgreen.svg)](https://crates.io/crates/sokoban-rs)
+[![crates.io](https://img.shields.io/badge/crates.io-v1.2.2-brightgreen.svg)](https://crates.io/crates/sokoban-rs)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 This is an implementation of Sokoban in the [Rust Programming Language](https://www.rust-lang.org).
