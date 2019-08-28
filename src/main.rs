@@ -25,7 +25,7 @@ extern crate xml;
 use clap::App;
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
-use sdl2::image::INIT_PNG;
+use sdl2::image::InitFlag;
 use sdl2::keyboard::Keycode;
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::video::{Window, WindowContext};
@@ -62,7 +62,7 @@ pub fn main() -> Result<(), Box<dyn Error>> {
 
     // Initialize SDL components
     let sdl = sdl2::init()?;
-    let _ = sdl2::image::init(INIT_PNG)?;
+    let _ = sdl2::image::init(InitFlag::PNG)?;
     let ttf_context = sdl2::ttf::init()?;
 
     let window = create_window(&sdl, width, height, fullscreen)?;

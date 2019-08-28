@@ -9,11 +9,11 @@ keywords = ["game", "sokoban"]
 license = "Apache-2.0"
 
 [dependencies]
-bitflags = "1.0.3"
-xml-rs = "0.7.0"
-clap = { version = "2.31.2", features = ["yaml"] }
+bitflags = "1.1.0"
+xml-rs = "0.8.0"
+clap = { version = "2.33.0", features = ["yaml"] }
 
 [dependencies.sdl2]
-version = "0.31"
+version = "0.32.2"
 default-features = false
 features = ["image", "ttf"]
