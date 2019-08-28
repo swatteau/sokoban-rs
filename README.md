@@ -18,16 +18,15 @@ Example for Debian/Ubuntu:
 
     sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
 
-
 Example for Mac OSX
 
     brew install sdl2 sdl2_image sdl2_ttf
 
 You might also like to read the README for these projects:
 
-- https://github.com/AngryLawyer/rust-sdl2
-- https://github.com/xsleonard/rust-sdl2_image
-- https://github.com/andelf/rust-sdl2_ttf
+- <https://github.com/AngryLawyer/rust-sdl2>
+- <https://github.com/xsleonard/rust-sdl2_image>
+- <https://github.com/andelf/rust-sdl2_ttf>
 
 To build `sokoban-rs`, type the following commands:
 
@@ -37,7 +36,7 @@ To build `sokoban-rs`, type the following commands:
 
 ## How to Play
 
-This game is released without any level. You can download level collections from http://www.sourcecode.se/sokoban/levels in the SLC (XML) format. For a quick start, try this:
+This game is released without any level. You can download level collections from <http://www.sourcecode.se/sokoban/levels> in the SLC (XML) format. For a quick start, try this:
 
     wget http://www.sourcecode.se/sokoban/download/microban.slc
     cargo run --release -- microban.slc
@@ -75,4 +74,3 @@ Example:
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
