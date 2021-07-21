@@ -57,7 +57,7 @@ Example:
 ## Credits
 
 - [Planet Cute](http://www.lostgarden.com/2007/05/dancs-miraculously-flexible-game.html) art by Daniel Cook (Lostgarden.com)
-- Ruji's Handwriting Font by Ruji C. (rujic.net)
+- Ruji's Handwriting Font by Ruji C. [rujic.net](rujic.net)
 
 ## License
 
